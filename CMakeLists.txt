@@ -14,6 +14,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(netra
     src/main.cpp
+    src/graph.cpp
 )
 
 target_include_directories(netra
