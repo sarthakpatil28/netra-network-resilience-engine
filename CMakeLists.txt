@@ -22,6 +22,16 @@ target_include_directories(netra
         ${PROJECT_SOURCE_DIR}/include
 )
 
+add_executable(netra_tests
+    tests/graph_tests.cpp
+    src/graph.cpp
+)
+
+target_include_directories(netra_tests
+    PRIVATE
+        ${PROJECT_SOURCE_DIR}/include
+)
+
 if(MSVC)
     target_compile_options(netra PRIVATE /W4)
 else()

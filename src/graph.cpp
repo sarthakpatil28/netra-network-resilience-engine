@@ -95,6 +95,31 @@ void Graph::removeNode(int node) {
 }
 
 
+//Checking if the node is present 
+bool Graph::hasNode(int node) const {
+    return adjacencyList.find(node) != adjacencyList.end();
+}
+
+
+//Checking if the edge/connection is present
+bool Graph::hasEdge(int source, int destination) const {
+
+    auto nodeIt = adjacencyList.find(source);
+
+    if (nodeIt == adjacencyList.end()) {
+        return false;
+    }
+
+    const auto& neighbours = nodeIt->second;//here & means dont make a copy search the existing vector
+
+    return std::find(
+        neighbours.begin(),
+        neighbours.end(),
+        destination
+    ) != neighbours.end();
+}
+
+
 
 void Graph::display() const{
     for(const auto& pair : adjacencyList){ // loop to go through every entry in out adjacencyList

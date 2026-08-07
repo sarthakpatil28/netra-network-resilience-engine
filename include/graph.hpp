@@ -15,6 +15,9 @@ public:
     void removeNode(int node);
     void removeEdge(int source, int destination);
 
+    bool hasNode(int node) const;
+    bool hasEdge(int source, int destination) const;
+
     void display() const;
 };
 
