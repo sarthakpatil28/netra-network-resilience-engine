@@ -56,8 +56,18 @@ struct RouteImpact {
     int recoveryHops;
     int additionalHops;
     bool routeChanged;
+    bool recovered;
 };
 
+
+
+
+struct ResilienceScore {
+    double score;
+    bool recovered;
+    bool connected;
+    FailureSeverity severity;
+};
 
 
 
@@ -106,6 +116,14 @@ public:
     int destinationNode,
     const FailureEvent& event
 ) const;
+
+
+ResilienceScore calculateResilienceScore(
+    const FailureReport& report,
+    const RouteImpact& impact
+) const;
+
+
 
     void display() const;
 };

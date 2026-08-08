@@ -569,15 +569,16 @@ RouteImpact Graph::analyzeRouteImpact(
         );
 
     if (originalRoute.empty()) {
-        return {0, 0, 0, false};
+        return {0, 0, 0, false, false};
     }
 
     if (!recovery.recovered) {
-        return {
+            return {
             static_cast<int>(originalRoute.size()) - 1,
             0,
             0,
-            true
+            true,
+            false
         };
     }
 
@@ -593,10 +594,51 @@ RouteImpact Graph::analyzeRouteImpact(
     bool routeChanged =
         originalRoute != recovery.route;
 
+        return {
+            originalHops,
+            recoveryHops,
+            additionalHops,
+            routeChanged,
+            true
+        };
+}
+
+
+
+
+
+ResilienceScore Graph::calculateResilienceScore(
+    const FailureReport& report,
+    const RouteImpact& impact
+) const {
+
+    double score = 100.0;
+
+    score -= report.healthImpact * 0.5;
+
+    if (!report.connectedAfter) {
+        score -= 30.0;
+    }
+
+    if (!impact.recovered) {
+        score -= 40.0;
+    }
+    else if (impact.additionalHops > 0) {
+        score -= impact.additionalHops * 5.0;
+    }
+
+    if (score < 0.0) {
+        score = 0.0;
+    }
+
+    if (score > 100.0) {
+        score = 100.0;
+    }
+
     return {
-        originalHops,
-        recoveryHops,
-        additionalHops,
-        routeChanged
+        score,
+        impact.recovered,
+        report.connectedAfter,
+        classifyFailure(report)
     };
 }

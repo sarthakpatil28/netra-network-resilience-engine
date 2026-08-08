@@ -764,9 +764,129 @@ void testRouteImpact() {
     assert(impact.recoveryHops == 3);
     assert(impact.additionalHops == 1);
     assert(impact.routeChanged);
+    assert(impact.recovered);
 
     std::cout << "[PASS] Route Impact Analysis\n";
 }
+
+
+
+
+
+void testResilienceScore() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+    network.addEdge(4, 5);
+
+    FailureEvent event{
+        FailureType::LINK,
+        1,
+        3
+    };
+
+    FailureReport report =
+        network.simulateFailure(1, event);
+
+    RouteImpact impact =
+        network.analyzeRouteImpact(1, 5, event);
+
+    ResilienceScore result =
+        network.calculateResilienceScore(report, impact);
+
+    assert(result.score == 95.0);
+    assert(result.recovered);
+    assert(result.connected);
+    assert(result.severity == FailureSeverity::LOW);
+
+    std::cout << "[PASS] Resilience Score\n";
+}
+
+
+
+
+
+
+
+
+
+void testFailedRecoveryScore() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+    network.addEdge(3, 5);
+
+    FailureEvent event{
+        FailureType::NODE,
+        3,
+        0
+    };
+
+    FailureReport report =
+        network.simulateFailure(1, event);
+
+    RouteImpact impact =
+        network.analyzeRouteImpact(1, 5, event);
+
+    ResilienceScore result =
+        network.calculateResilienceScore(report, impact);
+
+    assert(!result.recovered);
+    assert(!result.connected);
+    assert(result.score < 50.0);
+    assert(result.severity == FailureSeverity::HIGH);
+
+    std::cout << "[PASS] Failed Recovery Resilience Score\n";
+}
+
+
+
+
+
+
+
+void testPartialResilienceScore() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+    network.addEdge(4, 5);
+
+    FailureEvent event{
+        FailureType::LINK,
+        1,
+        3
+    };
+
+    FailureReport report =
+        network.simulateFailure(1, event);
+
+    RouteImpact impact =
+        network.analyzeRouteImpact(1, 5, event);
+
+    // Simulate a 20% health degradation
+    report.healthImpact = 20.0;
+    report.healthAfter = 80.0;
+
+    ResilienceScore result =
+        network.calculateResilienceScore(report, impact);
+
+    assert(result.score == 85.0);
+    assert(result.recovered);
+    assert(result.connected);
+
+    std::cout << "[PASS] Partial Resilience Score\n";
+}
+
+
+
+
 
 
 
@@ -812,6 +932,9 @@ int main() {
     testRecoverFromLinkFailure();
     testFailedRecovery();
     testRouteImpact();
+    testResilienceScore();
+    testFailedRecoveryScore();
+    testPartialResilienceScore();
 
     return 0;
 }
