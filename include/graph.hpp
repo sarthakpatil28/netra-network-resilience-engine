@@ -25,7 +25,7 @@ public:
 
 
     int connectedComponents() const;
-
+    bool isConnected() const;
 
     void display() const;
 };

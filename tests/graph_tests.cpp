@@ -326,6 +326,45 @@ void testConnectedComponents() {
 
 
 
+void testConnectedNetwork() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+
+    assert(network.isConnected());
+
+    std::cout << "[PASS] Connected Network Detection\n";
+}
+
+
+
+
+
+
+
+void testDisconnectedNetwork() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+
+    network.addEdge(4, 5);
+
+    assert(!network.isConnected());
+
+    std::cout << "[PASS] Disconnected Network Detection\n";
+}
+
+
+
+
+
+
+
+
 
 int main() {
 
@@ -344,6 +383,8 @@ int main() {
     testResilientPath();
     testNodeFailureRecovery();
     testConnectedComponents();
+    testConnectedNetwork();
+    testDisconnectedNetwork();  
 
     return 0;
 }

@@ -312,3 +312,21 @@ int Graph::connectedComponents() const {
 
     return components;
 }
+
+
+
+
+
+
+
+bool Graph::isConnected() const {
+    if (adjacencyList.empty()) {
+        return true;
+    }
+
+    int startNode = adjacencyList.begin()->first;
+
+    std::vector<int> visited = bfs(startNode);
+
+    return visited.size() == adjacencyList.size();
+}
