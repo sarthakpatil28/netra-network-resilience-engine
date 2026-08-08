@@ -742,6 +742,34 @@ void testFailedRecovery() {
 
 
 
+void testRouteImpact() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+    network.addEdge(4, 5);
+
+    FailureEvent event{
+        FailureType::LINK,
+        1,
+        3
+    };
+
+    RouteImpact impact =
+        network.analyzeRouteImpact(1, 5, event);
+
+    assert(impact.originalHops == 2);
+    assert(impact.recoveryHops == 3);
+    assert(impact.additionalHops == 1);
+    assert(impact.routeChanged);
+
+    std::cout << "[PASS] Route Impact Analysis\n";
+}
+
+
+
 
 
 int main() {
@@ -783,7 +811,7 @@ int main() {
 
     testRecoverFromLinkFailure();
     testFailedRecovery();
-
+    testRouteImpact();
 
     return 0;
 }

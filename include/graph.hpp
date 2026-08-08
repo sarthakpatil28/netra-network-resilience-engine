@@ -50,6 +50,18 @@ struct RecoveryResult {
 
 
 
+
+struct RouteImpact {
+    int originalHops;
+    int recoveryHops;
+    int additionalHops;
+    bool routeChanged;
+};
+
+
+
+
+
 class Graph {
 private:
     std::unordered_map<int, std::vector<int>> adjacencyList;
@@ -89,7 +101,11 @@ public:
     const FailureEvent& event
 ) const;
 
-
+    RouteImpact analyzeRouteImpact(
+    int startNode,
+    int destinationNode,
+    const FailureEvent& event
+) const;
 
     void display() const;
 };

@@ -544,3 +544,59 @@ RecoveryResult Graph::recoverFromFailure(
 
     return {true, route};
 }
+
+
+
+
+
+
+
+
+RouteImpact Graph::analyzeRouteImpact(
+    int startNode,
+    int destinationNode,
+    const FailureEvent& event
+) const {
+
+    std::vector<int> originalRoute =
+        shortestPath(startNode, destinationNode);
+
+    RecoveryResult recovery =
+        recoverFromFailure(
+            startNode,
+            destinationNode,
+            event
+        );
+
+    if (originalRoute.empty()) {
+        return {0, 0, 0, false};
+    }
+
+    if (!recovery.recovered) {
+        return {
+            static_cast<int>(originalRoute.size()) - 1,
+            0,
+            0,
+            true
+        };
+    }
+
+    int originalHops =
+        static_cast<int>(originalRoute.size()) - 1;
+
+    int recoveryHops =
+        static_cast<int>(recovery.route.size()) - 1;
+
+    int additionalHops =
+        recoveryHops - originalHops;
+
+    bool routeChanged =
+        originalRoute != recovery.route;
+
+    return {
+        originalHops,
+        recoveryHops,
+        additionalHops,
+        routeChanged
+    };
+}
