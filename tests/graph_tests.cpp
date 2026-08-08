@@ -465,6 +465,151 @@ void testCompleteHealthImpact() {
 
 
 
+void testFailureReport() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+
+    FailureReport report = network.analyzeFailure(1);
+
+    assert(report.healthBefore == 100.0);
+    assert(report.healthAfter == 100.0);
+    assert(report.healthImpact == 0.0);
+
+    assert(report.componentsBefore == 1);
+    assert(report.componentsAfter == 1);
+
+    assert(report.connectedBefore);
+    assert(report.connectedAfter);
+
+    std::cout << "[PASS] Failure Report\n";
+}
+
+
+
+
+
+
+void testLinkFailureAnalysis() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+    network.addEdge(4, 5);
+
+    FailureReport report =
+        network.analyzeLinkFailure(1, 1, 3);
+
+    assert(report.healthBefore == 100.0);
+    assert(report.healthAfter == 100.0);
+
+    assert(report.healthImpact == 0.0);
+
+    assert(report.componentsBefore == 1);
+    assert(report.componentsAfter == 1);
+
+    assert(report.connectedBefore);
+    assert(report.connectedAfter);
+
+    std::cout << "[PASS] Link Failure Analysis\n";
+}
+
+
+
+
+
+void testLowSeverity() {
+    Graph network;
+
+    FailureReport report{100.0, 100.0, 0.0, 1, 1, true, true};
+
+    assert(network.classifyFailure(report) == FailureSeverity::LOW);
+
+    std::cout << "[PASS] Low Failure Severity\n";
+}
+
+
+void testModerateSeverity() {
+    Graph network;
+
+    FailureReport report{100.0, 80.0, 20.0, 1, 1, true, true};
+
+    assert(network.classifyFailure(report) == FailureSeverity::MODERATE);
+
+    std::cout << "[PASS] Moderate Failure Severity\n";
+}
+
+
+
+void testHighSeverity() {
+    Graph network;
+
+    FailureReport report{100.0, 75.0, 25.0, 1, 2, true, false};
+
+    assert(network.classifyFailure(report) == FailureSeverity::HIGH);
+
+    std::cout << "[PASS] High Failure Severity\n";
+}
+
+
+
+void testCriticalSeverity() {
+    Graph network;
+
+    FailureReport report{100.0, 30.0, 70.0, 1, 3, true, false};
+
+    assert(network.classifyFailure(report) == FailureSeverity::CRITICAL);
+
+    std::cout << "[PASS] Critical Failure Severity\n";
+}
+
+
+
+
+
+
+
+void testNodeFailureAnalysis() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+
+    FailureReport report =
+        network.analyzeNodeFailure(1, 3);
+
+    assert(report.healthBefore == 100.0);
+    assert(report.healthAfter == 75.0);
+
+    assert(report.healthImpact == 25.0);
+
+    assert(report.componentsBefore == 1);
+    assert(report.componentsAfter == 2);
+
+    assert(report.connectedBefore);
+    assert(!report.connectedAfter);
+
+    std::cout << "[PASS] Node Failure Analysis\n";
+}
+
+
+
+
+
+
+
+
+
+
+
+
 int main() {
 
     testAddNode();
@@ -487,10 +632,18 @@ int main() {
     testHealthyNetworkScore();
     testPartialNetworkScore();
     testInvalidHealthScoreNode();
-    
+
     testZeroHealthImpact();
     testPartialHealthImpact();
     testCompleteHealthImpact();
+    testFailureReport();
+    testLinkFailureAnalysis();
+    testNodeFailureAnalysis();
+
+    testLowSeverity();
+    testModerateSeverity();
+    testHighSeverity();
+    testCriticalSeverity();
 
 
     return 0;

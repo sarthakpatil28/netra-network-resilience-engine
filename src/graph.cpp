@@ -365,4 +365,119 @@ double Graph::healthImpact(double beforeScore, double afterScore) const {
 
 
 
+FailureReport Graph::analyzeFailure(int startNode) const {
+    FailureReport report{};
 
+    report.healthBefore = networkHealthScore(startNode);
+    report.healthAfter = report.healthBefore;
+
+    report.healthImpact = 0.0;
+
+    report.componentsBefore = connectedComponents();
+    report.componentsAfter = report.componentsBefore;
+
+    report.connectedBefore = isConnected();
+    report.connectedAfter = report.connectedBefore;
+
+    return report;
+}
+
+
+
+
+
+
+
+FailureReport Graph::analyzeLinkFailure(
+    int startNode,
+    int source,
+    int destination
+) const {
+
+    FailureReport report{};
+
+    report.healthBefore = networkHealthScore(startNode);
+    report.componentsBefore = connectedComponents();
+    report.connectedBefore = isConnected();
+
+    Graph failedNetwork = *this;
+
+    failedNetwork.removeEdge(source, destination);
+
+    report.healthAfter =
+        failedNetwork.networkHealthScore(startNode);
+
+    report.componentsAfter =
+        failedNetwork.connectedComponents();
+
+    report.connectedAfter =
+        failedNetwork.isConnected();
+
+    report.healthImpact =
+        healthImpact(report.healthBefore, report.healthAfter);
+
+    return report;
+}
+
+
+
+
+
+
+FailureReport Graph::analyzeNodeFailure(
+    int startNode,
+    int failedNode
+) const {
+
+    FailureReport report{};
+
+    report.healthBefore = networkHealthScore(startNode);
+    report.componentsBefore = connectedComponents();
+    report.connectedBefore = isConnected();
+
+    Graph failedNetwork = *this;
+
+    failedNetwork.removeNode(failedNode);
+
+    report.healthAfter =
+        failedNetwork.networkHealthScore(startNode);
+
+    report.componentsAfter =
+        failedNetwork.connectedComponents();
+
+    report.connectedAfter =
+        failedNetwork.isConnected();
+
+    report.healthImpact =
+        healthImpact(report.healthBefore, report.healthAfter);
+
+    return report;
+}
+
+
+
+
+
+
+
+FailureSeverity Graph::classifyFailure(
+    const FailureReport& report
+) const {
+
+    if (report.healthImpact <= 0.0 &&
+        report.connectedAfter) {
+        return FailureSeverity::LOW;
+    }
+
+    if (report.connectedAfter &&
+        report.healthImpact <= 25.0) {
+        return FailureSeverity::MODERATE;
+    }
+
+    if (!report.connectedAfter &&
+        report.healthImpact <= 50.0) {
+        return FailureSeverity::HIGH;
+    }
+
+    return FailureSeverity::CRITICAL;
+}

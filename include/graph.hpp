@@ -4,6 +4,30 @@
 #include <unordered_map>
 #include <vector>
 
+
+
+
+struct FailureReport {
+    double healthBefore;
+    double healthAfter;
+    double healthImpact;
+    int componentsBefore;
+    int componentsAfter;
+    bool connectedBefore;
+    bool connectedAfter;
+};
+
+
+
+enum class FailureSeverity {
+    LOW,
+    MODERATE,
+    HIGH,
+    CRITICAL
+};
+
+
+
 class Graph {
 private:
     std::unordered_map<int, std::vector<int>> adjacencyList;
@@ -30,6 +54,11 @@ public:
     double healthImpact(double beforeScore, double afterScore) const;
 
 
+    FailureReport analyzeFailure(int startNode) const;
+    FailureReport analyzeLinkFailure(int startNode,int source,int destination) const;
+    FailureReport analyzeNodeFailure(int startNode,int failedNode) const;
+
+    FailureSeverity classifyFailure(const FailureReport& report) const;
 
 
     void display() const;
