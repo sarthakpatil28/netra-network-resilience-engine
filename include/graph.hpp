@@ -43,6 +43,12 @@ struct FailureEvent {
 
 
 
+struct RecoveryResult {
+    bool recovered;
+    std::vector<int> route;
+};
+
+
 
 class Graph {
 private:
@@ -76,6 +82,14 @@ public:
 
     FailureSeverity classifyFailure(const FailureReport& report) const;
     FailureReport simulateFailure(int startNode,const FailureEvent& event) const;
+
+    RecoveryResult recoverFromFailure(
+    int startNode,
+    int destinationNode,
+    const FailureEvent& event
+) const;
+
+
 
     void display() const;
 };

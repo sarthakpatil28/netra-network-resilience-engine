@@ -683,6 +683,66 @@ void testSimulateNodeFailure() {
 
 
 
+void testRecoverFromLinkFailure() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+    network.addEdge(4, 5);
+
+    FailureEvent event{
+        FailureType::LINK,
+        1,
+        3
+    };
+
+    RecoveryResult result =
+        network.recoverFromFailure(1, 5, event);
+
+    assert(result.recovered);
+
+    assert(
+        result.route ==
+        std::vector<int>({1, 2, 4, 5})
+    );
+
+    std::cout << "[PASS] Recover From Link Failure\n";
+}
+
+
+
+void testFailedRecovery() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+    network.addEdge(3, 5);
+
+    FailureEvent event{
+        FailureType::NODE,
+        3,
+        0
+    };
+
+    RecoveryResult result =
+        network.recoverFromFailure(1, 5, event);
+
+    assert(!result.recovered);
+    assert(result.route.empty());
+
+    std::cout << "[PASS] Failed Recovery Detection\n";
+}
+
+
+
+
+
+
+
+
+
 
 int main() {
 
@@ -720,6 +780,9 @@ int main() {
     testCriticalSeverity();
     testSimulateLinkFailure();
     testSimulateNodeFailure();
+
+    testRecoverFromLinkFailure();
+    testFailedRecovery();
 
 
     return 0;

@@ -508,3 +508,39 @@ FailureReport Graph::simulateFailure(
 
     return analyzeFailure(startNode);
 }
+
+
+
+
+
+
+RecoveryResult Graph::recoverFromFailure(
+    int startNode,
+    int destinationNode,
+    const FailureEvent& event
+) const {
+
+    Graph failedNetwork = *this;
+
+    if (event.type == FailureType::LINK) {
+        failedNetwork.removeEdge(
+            event.source,
+            event.destination
+        );
+    }
+    else if (event.type == FailureType::NODE) {
+        failedNetwork.removeNode(event.source);
+    }
+
+    std::vector<int> route =
+        failedNetwork.shortestPath(
+            startNode,
+            destinationNode
+        );
+
+    if (route.empty()) {
+        return {false, {}};
+    }
+
+    return {true, route};
+}
