@@ -363,6 +363,59 @@ void testDisconnectedNetwork() {
 
 
 
+void testHealthyNetworkScore() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+
+    double score = network.networkHealthScore(1);
+
+    assert(score == 100.0);
+
+    std::cout << "[PASS] Healthy Network Score\n";
+}
+
+
+
+
+
+void testPartialNetworkScore() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+
+    network.addEdge(4, 5);
+
+    double score = network.networkHealthScore(1);
+
+    assert(score == 60.0);
+
+    std::cout << "[PASS] Partial Network Score\n";
+}
+
+
+
+
+
+void testInvalidHealthScoreNode() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+
+    double score = network.networkHealthScore(99);
+
+    assert(score == 0.0);
+
+    std::cout << "[PASS] Invalid Health Score Node\n";
+}
+
+
+
 
 
 
@@ -385,6 +438,10 @@ int main() {
     testConnectedComponents();
     testConnectedNetwork();
     testDisconnectedNetwork();  
+    testHealthyNetworkScore();
+    testPartialNetworkScore();
+    testInvalidHealthScoreNode();
+
 
     return 0;
 }

@@ -26,7 +26,12 @@ public:
 
     int connectedComponents() const;
     bool isConnected() const;
+    double networkHealthScore(int startNode) const;
 
+
+
+
+    
     void display() const;
 };
 

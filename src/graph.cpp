@@ -330,3 +330,25 @@ bool Graph::isConnected() const {
 
     return visited.size() == adjacencyList.size();
 }
+
+
+
+
+
+double Graph::networkHealthScore(int startNode) const {
+    if (!hasNode(startNode)) {
+        return 0.0;
+    }
+
+    std::vector<int> reachable = bfs(startNode);
+
+    if (adjacencyList.empty()) {
+        return 0.0;
+    }
+
+    double score =
+        (static_cast<double>(reachable.size()) /
+         static_cast<double>(adjacencyList.size())) * 100.0;
+
+    return score;
+}
