@@ -211,7 +211,8 @@ void printMenu() {
     std::cout << "7. Analyze link failure\n";
     std::cout << "8. Analyze node failure\n";
     std::cout << "9. Analyze multiple failures\n";
-    std::cout << "10. Exit\n";
+    std::cout << "10. Simulate failure & analyze recovery\n";
+    std::cout << "11. Exit\n";
     std::cout << "========================================\n";
     std::cout << "Enter choice: ";
 }
@@ -644,11 +645,237 @@ int main() {
                 break;
             }
 
+
+            case 10: {
+
+                int startNode;
+                int destinationNode;
+                int failureType;
+
+                std::cout << "Enter source node: ";
+                std::cin >> startNode;
+
+                std::cout << "Enter destination node: ";
+                std::cin >> destinationNode;
+
+                std::cout << "\nFailure type:\n";
+                std::cout << "1. Link failure\n";
+                std::cout << "2. Node failure\n";
+                std::cout << "Enter failure type: ";
+                std::cin >> failureType;
+
+                FailureEvent event{};
+
+                if (failureType == 1) {
+
+                    int source;
+                    int destination;
+
+                    std::cout << "Enter failed link source: ";
+                    std::cin >> source;
+
+                    std::cout << "Enter failed link destination: ";
+                    std::cin >> destination;
+
+                    event = {
+                        FailureType::LINK,
+                        source,
+                        destination
+                    };
+
+                }
+                else if (failureType == 2) {
+
+                    int failedNode;
+
+                    std::cout << "Enter failed node: ";
+                    std::cin >> failedNode;
+
+                    event = {
+                        FailureType::NODE,
+                        failedNode,
+                        0
+                    };
+
+                }
+                else {
+
+                    std::cout << "Invalid failure type.\n";
+                    break;
+                }
+
+                // ------------------------------------------
+                // Original route
+                // ------------------------------------------
+
+                auto originalRoute =
+                    network.shortestPath(
+                        startNode,
+                        destinationNode
+                    );
+
+                if (originalRoute.empty()) {
+
+                    std::cout
+                        << "No original route exists between the selected nodes.\n";
+
+                    break;
+                }
+
+                // ------------------------------------------
+                // Failure simulation
+                // ------------------------------------------
+
+                auto report =
+                    network.simulateFailure(
+                        startNode,
+                        event
+                    );
+
+                // ------------------------------------------
+                // Recovery analysis
+                // ------------------------------------------
+
+                auto recovery =
+                    network.recoverFromFailure(
+                        startNode,
+                        destinationNode,
+                        event
+                    );
+
+                // ------------------------------------------
+                // Route impact
+                // ------------------------------------------
+
+                auto impact =
+                    network.analyzeRouteImpact(
+                        startNode,
+                        destinationNode,
+                        event
+                    );
+
+                // ------------------------------------------
+                // Resilience score
+                // ------------------------------------------
+
+                auto resilience =
+                    network.calculateResilienceScore(
+                        report,
+                        impact
+                    );
+
+                std::cout
+                    << "\n========== ROUTE FAILURE ANALYSIS ==========\n";
+
+                std::cout << "Original route : ";
+
+                for (int node : originalRoute) {
+                    std::cout << node << " ";
+                }
+
+                std::cout << "\n";
+
+                std::cout
+                    << "Failure type   : "
+                    << (failureType == 1 ? "LINK" : "NODE")
+                    << "\n";
+
+                if (failureType == 1) {
+
+                    std::cout
+                        << "Failed link    : "
+                        << event.source
+                        << " - "
+                        << event.destination
+                        << "\n";
+
+                }
+                else {
+
+                    std::cout
+                        << "Failed node    : "
+                        << event.source
+                        << "\n";
+                }
+
+                std::cout
+                    << "\nRecovery       : "
+                    << (recovery.recovered ? "SUCCESS" : "FAILED")
+                    << "\n";
+
+                if (recovery.recovered) {
+
+                    std::cout << "Recovered route: ";
+
+                    for (int node : recovery.route) {
+                        std::cout << node << " ";
+                    }
+
+                    std::cout << "\n";
+                }
+
+                std::cout
+                    << "\nOriginal hops  : "
+                    << impact.originalHops
+                    << "\n";
+
+                std::cout
+                    << "Recovery hops  : "
+                    << impact.recoveryHops
+                    << "\n";
+
+                std::cout
+                    << "Additional hops: "
+                    << impact.additionalHops
+                    << "\n";
+
+                std::cout
+                    << "Route changed  : "
+                    << (impact.routeChanged ? "YES" : "NO")
+                    << "\n";
+
+                std::cout
+                    << "Health before  : "
+                    << report.healthBefore
+                    << "\n";
+
+                std::cout
+                    << "Health after   : "
+                    << report.healthAfter
+                    << "\n";
+
+                std::cout
+                    << "Health impact  : "
+                    << report.healthImpact
+                    << "\n";
+
+                std::cout
+                    << "Resilience     : "
+                    << resilience.score
+                    << "\n";
+
+                std::cout
+                    << "Severity       : "
+                    << severityToString(resilience.severity)
+                    << "\n";
+
+                std::cout
+                    << "=============================================\n";
+
+                break;
+            }
+
+
+
+
+
+
+
             // ==========================================
             // EXIT
             // ==========================================
 
-            case 10:
+            case 11:
 
                 std::cout
                     << "Exiting NETRA.\n";
