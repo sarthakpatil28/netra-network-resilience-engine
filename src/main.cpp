@@ -1,193 +1,4 @@
-/*#include "graph.hpp"
 
-#include <iostream>
-
-int main() {
-    Graph network;
-
-    network.addEdge(1,2);
-    network.addEdge(2,3);
-    network.addEdge(1,3);
-
-     // duplicate edge
-    network.addEdge(1,2);
-    
-    //self edge
-    network.addEdge(3,3);
-   
-
-    //Removing edge
-   // std::cout << "Before removing Edge\n";
-    //network.display();
-
-   // network.removeEdge(1,3);
-
-    //std::cout << "After removing Edge\n";
-    //network.display();
-
-
-
-    std::cout << "Before removing Node\n";
-    network.display();
-
-    network.removeNode(1);
-
-    std::cout << "After removing Node\n";
-    network.display();
-
-    return 0;
-}*/
-
-
-/*#include "graph.hpp"
-#include <iostream>
-
-int main() {
-
-    Graph network;
-
-    network.addEdge(1, 2);
-    network.addEdge(2, 3);
-
-    std::cout << "Node 1 exists: "
-              << network.hasNode(1) << "\n";
-
-    std::cout << "Node 99 exists: "
-              << network.hasNode(99) << "\n";
-
-    std::cout << "Edge 1-2 exists: "
-              << network.hasEdge(1, 2) << "\n";
-
-    std::cout << "Edge 1-3 exists: "
-              << network.hasEdge(1, 3) << "\n";
-
-    return 0;
-}*/
-
-/*#include "graph.hpp"
-#include <iostream>
-
-int main() {
-    Graph network;
-
-    network.addEdge(1, 2);
-    network.addEdge(1, 3);
-    network.addEdge(2, 4);
-    network.addEdge(3, 5);
-
-    std::vector<int> result = network.bfs(1);
-
-    std::cout << "BFS from node 1: ";
-
-    for (int node : result) {
-        std::cout << node << " ";
-    }
-
-    std::cout << '\n';
-
-    return 0;
-}*/
-
-
-/*#include "graph.hpp"
-#include <iostream>
-
-int main() {
-    Graph network;
-
-    network.addEdge(1, 2);
-    network.addEdge(1, 3);
-    network.addEdge(2, 4);
-    network.addEdge(3, 5);
-
-    auto distances = network.bfsDistances(1);
-
-    std::cout << "BFS distances from node 1:\n";
-
-    for (const auto& [node, distance] : distances) {
-        std::cout << "Node " << node
-                  << " -> " << distance << " hops\n";
-    }
-
-    return 0;
-}*/
-
-
-/*#include "graph.hpp"
-#include <iostream>
-
-int main() {
-    Graph network;
-
-    network.addEdge(1, 2);
-    network.addEdge(1, 3);
-    network.addEdge(2, 4);
-    network.addEdge(3, 5);
-
-    auto path = network.shortestPath(1, 5);
-
-    std::cout << "Shortest path from 1 to 5: ";
-
-    for (int node : path) {
-        std::cout << node << " ";
-    }
-
-    std::cout << '\n';
-
-    return 0;
-}*/
-
-
-
-
-/*
-
-#include "graph.hpp"
-#include <iostream>
-
-int main() {
-    Graph network;
-
-    network.addEdge(1, 2);
-    network.addEdge(1, 3);
-    network.addEdge(2, 4);
-    network.addEdge(3, 4);
-    network.addEdge(4, 5);
-    network.addEdge(3, 5);
-
-    std::cout << "Before failure:\n";
-
-    auto pathBefore = network.resilientPath(1, 5);
-
-    std::cout << "Route: ";
-
-    for (int node : pathBefore) {
-        std::cout << node << " ";
-    }
-
-    std::cout << "\n";
-
-    // Simulate network link failure
-    network.removeEdge(1, 3);
-
-    std::cout << "\nAfter failure of link 1-3:\n";
-
-    auto pathAfter = network.resilientPath(1, 5);
-
-    if (pathAfter.empty()) {
-        std::cout << "No route available\n";
-    } else {
-        std::cout << "Route: ";
-
-        for (int node : pathAfter) {
-            std::cout << node << " ";
-        }
-
-        std::cout << "\n";
-    }
-
-    return 0;
-}*/
 
 #include "graph.hpp"
 
@@ -195,6 +6,158 @@ int main() {
 #include <limits>
 #include <string>
 #include <vector>
+
+
+
+void printIncidentReport(
+    const FailureEvent& event,
+    const std::vector<int>& originalRoute,
+    const RecoveryResult& recovery,
+    const RouteImpact& impact,
+    const FailureReport& report,
+    const ResilienceScore& resilience
+) {
+    std::cout << "\n";
+    std::cout << "============================================================\n";
+    std::cout << "                 NETRA INCIDENT REPORT\n";
+    std::cout << "============================================================\n";
+
+    std::cout << "Failure Type        : "
+              << (event.type == FailureType::LINK ? "LINK FAILURE" : "NODE FAILURE")
+              << "\n";
+
+    if (event.type == FailureType::LINK) {
+        std::cout << "Failed Component    : Link "
+                  << event.source
+                  << " - "
+                  << event.destination
+                  << "\n";
+    } else {
+        std::cout << "Failed Component    : Node "
+                  << event.source
+                  << "\n";
+    }
+
+    std::cout << "------------------------------------------------------------\n";
+
+    std::cout << "ORIGINAL ROUTE\n";
+    std::cout << "Route               : ";
+
+    for (std::size_t i = 0; i < originalRoute.size(); ++i) {
+        std::cout << originalRoute[i];
+
+        if (i + 1 < originalRoute.size()) {
+            std::cout << " -> ";
+        }
+    }
+
+    std::cout << "\n";
+    std::cout << "Hops                : "
+              << impact.originalHops
+              << "\n";
+
+    std::cout << "------------------------------------------------------------\n";
+
+    std::cout << "RECOVERY\n";
+
+    std::cout << "Status              : "
+              << (recovery.recovered ? "SUCCESS" : "FAILED")
+              << "\n";
+
+    if (recovery.recovered) {
+
+        std::cout << "Recovery Route      : ";
+
+        for (std::size_t i = 0; i < recovery.route.size(); ++i) {
+            std::cout << recovery.route[i];
+
+            if (i + 1 < recovery.route.size()) {
+                std::cout << " -> ";
+            }
+        }
+
+        std::cout << "\n";
+    }
+
+    std::cout << "Recovery Hops       : "
+              << impact.recoveryHops
+              << "\n";
+
+    std::cout << "Additional Hops     : "
+              << impact.additionalHops
+              << "\n";
+
+    std::cout << "Route Changed       : "
+              << (impact.routeChanged ? "YES" : "NO")
+              << "\n";
+
+    std::cout << "------------------------------------------------------------\n";
+
+    std::cout << "NETWORK IMPACT\n";
+
+    std::cout << "Health Before      : "
+              << report.healthBefore
+              << "\n";
+
+    std::cout << "Health After       : "
+              << report.healthAfter
+              << "\n";
+
+    std::cout << "Health Impact      : "
+              << report.healthImpact
+              << "\n";
+
+    std::cout << "Connected Before   : "
+              << (report.connectedBefore ? "YES" : "NO")
+              << "\n";
+
+    std::cout << "Connected After    : "
+              << (report.connectedAfter ? "YES" : "NO")
+              << "\n";
+
+    std::cout << "------------------------------------------------------------\n";
+
+    std::cout << "RESILIENCE\n";
+
+    std::cout << "Resilience Score   : "
+              << resilience.score
+              << "\n";
+
+    std::cout << "Severity           : ";
+
+            switch (resilience.severity) {
+                case FailureSeverity::LOW:
+                    std::cout << "LOW";
+                    break;
+
+                case FailureSeverity::MODERATE:
+                    std::cout << "MODERATE";
+                    break;
+
+                case FailureSeverity::HIGH:
+                    std::cout << "HIGH";
+                    break;
+
+                case FailureSeverity::CRITICAL:
+                    std::cout << "CRITICAL";
+                    break;
+            }
+
+            std::cout << "\n";
+
+    std::cout << "Recovery           : "
+              << (resilience.recovered ? "SUCCESS" : "FAILED")
+              << "\n";
+
+    std::cout << "Network Connected  : "
+              << (resilience.connected ? "YES" : "NO")
+              << "\n";
+
+    std::cout << "============================================================\n";
+}
+
+
+
 
 void printMenu() {
     std::cout << "\n";
@@ -764,103 +727,14 @@ int main() {
                         impact
                     );
 
-                std::cout
-                    << "\n========== ROUTE FAILURE ANALYSIS ==========\n";
-
-                std::cout << "Original route : ";
-
-                for (int node : originalRoute) {
-                    std::cout << node << " ";
-                }
-
-                std::cout << "\n";
-
-                std::cout
-                    << "Failure type   : "
-                    << (failureType == 1 ? "LINK" : "NODE")
-                    << "\n";
-
-                if (failureType == 1) {
-
-                    std::cout
-                        << "Failed link    : "
-                        << event.source
-                        << " - "
-                        << event.destination
-                        << "\n";
-
-                }
-                else {
-
-                    std::cout
-                        << "Failed node    : "
-                        << event.source
-                        << "\n";
-                }
-
-                std::cout
-                    << "\nRecovery       : "
-                    << (recovery.recovered ? "SUCCESS" : "FAILED")
-                    << "\n";
-
-                if (recovery.recovered) {
-
-                    std::cout << "Recovered route: ";
-
-                    for (int node : recovery.route) {
-                        std::cout << node << " ";
-                    }
-
-                    std::cout << "\n";
-                }
-
-                std::cout
-                    << "\nOriginal hops  : "
-                    << impact.originalHops
-                    << "\n";
-
-                std::cout
-                    << "Recovery hops  : "
-                    << impact.recoveryHops
-                    << "\n";
-
-                std::cout
-                    << "Additional hops: "
-                    << impact.additionalHops
-                    << "\n";
-
-                std::cout
-                    << "Route changed  : "
-                    << (impact.routeChanged ? "YES" : "NO")
-                    << "\n";
-
-                std::cout
-                    << "Health before  : "
-                    << report.healthBefore
-                    << "\n";
-
-                std::cout
-                    << "Health after   : "
-                    << report.healthAfter
-                    << "\n";
-
-                std::cout
-                    << "Health impact  : "
-                    << report.healthImpact
-                    << "\n";
-
-                std::cout
-                    << "Resilience     : "
-                    << resilience.score
-                    << "\n";
-
-                std::cout
-                    << "Severity       : "
-                    << severityToString(resilience.severity)
-                    << "\n";
-
-                std::cout
-                    << "=============================================\n";
+                printIncidentReport(
+                    event,
+                    originalRoute,
+                    recovery,
+                    impact,
+                    report,
+                    resilience
+                );
 
                 break;
             }
