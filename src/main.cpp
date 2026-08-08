@@ -175,7 +175,8 @@ void printMenu() {
     std::cout << "8. Analyze node failure\n";
     std::cout << "9. Analyze multiple failures\n";
     std::cout << "10. Simulate failure & analyze recovery\n";
-    std::cout << "11. Exit\n";
+    std::cout << "11. Network Health Dashboard\n";
+    std::cout << "12. Exit\n";
     std::cout << "========================================\n";
     std::cout << "Enter choice: ";
 }
@@ -741,7 +742,58 @@ int main() {
 
 
 
+             case 11: {
 
+                        int startNode;
+
+                        std::cout << "\nEnter node for health analysis: ";
+                        std::cin >> startNode;
+
+                        if (!network.hasNode(startNode)) {
+                            std::cout << "Invalid node.\n";
+                            break;
+                        }
+
+                        double health =
+                            network.networkHealthScore(startNode);
+
+                        bool connected =
+                            network.isConnected();
+
+                        int components =
+                            network.connectedComponents();
+
+                        std::cout << "\n";
+                        std::cout << "============================================================\n";
+                        std::cout << "                 NETRA NETWORK HEALTH\n";
+                        std::cout << "============================================================\n";
+
+                        std::cout << "Analysis Start Node  : "
+                                << startNode
+                                << "\n";
+
+                        std::cout << "Network Status       : "
+                                << (health >= 80.0 ? "HEALTHY" :
+                                    health >= 50.0 ? "DEGRADED" :
+                                                    "CRITICAL")
+                                << "\n";
+
+                        std::cout << "Network Health       : "
+                                << health
+                                << "%\n";
+
+                        std::cout << "Connected            : "
+                                << (connected ? "YES" : "NO")
+                                << "\n";
+
+                        std::cout << "Connected Components : "
+                                << components
+                                << "\n";
+
+                        std::cout << "============================================================\n";
+
+                        break;
+                    }
 
 
 
@@ -749,7 +801,7 @@ int main() {
             // EXIT
             // ==========================================
 
-            case 11:
+            case 12:
 
                 std::cout
                     << "Exiting NETRA.\n";
