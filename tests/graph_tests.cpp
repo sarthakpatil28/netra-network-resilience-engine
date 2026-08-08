@@ -300,6 +300,32 @@ void testNodeFailureRecovery() {
 
 
 
+void testConnectedComponents() {
+    Graph network;
+
+    // First connected component
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+
+    // Second connected component
+    network.addEdge(4, 5);
+
+    // Third connected component
+    network.addNode(6);
+
+    int components = network.connectedComponents();
+
+    assert(components == 3);
+
+    std::cout << "[PASS] Connected Components\n";
+}
+
+
+
+
+
+
+
 
 int main() {
 
@@ -317,6 +343,7 @@ int main() {
     testAlternateRouteAfterFailure();
     testResilientPath();
     testNodeFailureRecovery();
+    testConnectedComponents();
 
     return 0;
 }

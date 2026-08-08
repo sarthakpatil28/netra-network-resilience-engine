@@ -23,6 +23,10 @@ public:
     std::vector<int> shortestPath(int startNode, int targetNode) const;
     std::vector<int> resilientPath(int startNode, int destinationNode) const;
 
+
+    int connectedComponents() const;
+
+
     void display() const;
 };
 

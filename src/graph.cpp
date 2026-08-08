@@ -241,7 +241,7 @@ std::vector<int> Graph::shortestPath(int startNode, int targetNode) const {
 
 
 std::vector<int> Graph::resilientPath(int startNode,int destinationNode) const {
-    
+
     std::vector<int> path = shortestPath(startNode, destinationNode);
 
     if (path.empty()) {
@@ -272,4 +272,43 @@ void Graph::display() const{
     
     std::cout << "\n";
     }
+}
+
+
+
+
+
+
+int Graph::connectedComponents() const {
+    std::unordered_set<int> visited;
+    int components = 0;
+
+    for (const auto& [node, neighbors] : adjacencyList) {
+        if (visited.find(node) != visited.end()) {
+            continue;
+        }
+
+        components++;
+
+        std::vector<int> queue;
+        queue.push_back(node);
+
+        visited.insert(node);
+
+        size_t index = 0;
+
+        while (index < queue.size()) {
+            int current = queue[index];
+            index++;
+
+            for (int neighbor : adjacencyList.at(current)) {
+                if (visited.find(neighbor) == visited.end()) {
+                    visited.insert(neighbor);
+                    queue.push_back(neighbor);
+                }
+            }
+        }
+    }
+
+    return components;
 }
