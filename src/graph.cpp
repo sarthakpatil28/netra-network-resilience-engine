@@ -642,3 +642,65 @@ ResilienceScore Graph::calculateResilienceScore(
         classifyFailure(report)
     };
 }
+
+
+
+
+
+
+
+MultiFailureReport Graph::analyzeMultipleFailures(
+    const std::vector<FailureEvent>& events
+) const {
+
+    MultiFailureReport report{
+        static_cast<int>(events.size()),
+        0,
+        0,
+        true,
+        FailureSeverity::LOW
+    };
+    Graph simulated = *this;
+
+    for (const auto& event : events) {
+
+        if (event.type == FailureType::LINK) {
+            ++report.failedLinks;
+
+            if (simulated.hasEdge(event.source, event.destination)) {
+                simulated.removeEdge(
+                    event.source,
+                    event.destination
+                );
+            }
+        }
+        else if (event.type == FailureType::NODE) {
+            ++report.failedNodes;
+
+           if (simulated.hasNode(event.source)) {
+                simulated.removeNode(event.source);
+            }
+        }
+    }
+
+    report.connectedAfter =
+        simulated.isConnected();
+
+
+    if (!report.connectedAfter) {
+    report.severity = FailureSeverity::CRITICAL;
+}
+else if (report.failedNodes >= 2 || report.totalFailures >= 4) {
+    report.severity = FailureSeverity::HIGH;
+}
+else if (report.totalFailures >= 2) {
+    report.severity = FailureSeverity::MODERATE;
+}
+else {
+    report.severity = FailureSeverity::LOW;
+}
+
+
+
+    return report;
+}

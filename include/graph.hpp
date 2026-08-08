@@ -72,6 +72,18 @@ struct ResilienceScore {
 
 
 
+struct MultiFailureReport {
+    int totalFailures;
+    int failedLinks;
+    int failedNodes;
+    bool connectedAfter;
+    FailureSeverity severity;
+};
+
+
+
+
+
 class Graph {
 private:
     std::unordered_map<int, std::vector<int>> adjacencyList;
@@ -105,24 +117,29 @@ public:
     FailureSeverity classifyFailure(const FailureReport& report) const;
     FailureReport simulateFailure(int startNode,const FailureEvent& event) const;
 
-    RecoveryResult recoverFromFailure(
-    int startNode,
-    int destinationNode,
-    const FailureEvent& event
-) const;
+        RecoveryResult recoverFromFailure(
+        int startNode,
+        int destinationNode,
+        const FailureEvent& event
+    ) const;
 
-    RouteImpact analyzeRouteImpact(
-    int startNode,
-    int destinationNode,
-    const FailureEvent& event
-) const;
+        RouteImpact analyzeRouteImpact(
+        int startNode,
+        int destinationNode,
+        const FailureEvent& event
+    ) const;
 
 
-ResilienceScore calculateResilienceScore(
-    const FailureReport& report,
-    const RouteImpact& impact
-) const;
+    ResilienceScore calculateResilienceScore(
+        const FailureReport& report,
+        const RouteImpact& impact
+    ) const;
 
+
+
+    MultiFailureReport analyzeMultipleFailures(
+        const std::vector<FailureEvent>& events
+    ) const;
 
 
     void display() const;

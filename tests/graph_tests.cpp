@@ -889,6 +889,158 @@ void testPartialResilienceScore() {
 
 
 
+void testMultipleLinkFailures() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(2, 5);
+    network.addEdge(3, 5);
+
+    std::vector<FailureEvent> events = {
+        {FailureType::LINK, 1, 2},
+        {FailureType::LINK, 3, 4}
+    };
+
+    MultiFailureReport report =
+        network.analyzeMultipleFailures(events);
+
+    assert(report.totalFailures == 2);
+    assert(report.failedLinks == 2);
+    assert(report.failedNodes == 0);
+    assert(report.connectedAfter);
+
+    std::cout << "[PASS] Multiple Link Failures\n";
+}
+
+
+
+
+
+
+
+void testMultipleNodeFailures() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(1, 4);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(2, 5);
+    network.addEdge(3, 5);
+    network.addEdge(4, 5);
+
+    std::vector<FailureEvent> events = {
+        {FailureType::NODE, 2, 0},
+        {FailureType::NODE, 3, 0}
+    };
+
+    MultiFailureReport report =
+        network.analyzeMultipleFailures(events);
+
+    assert(report.totalFailures == 2);
+    assert(report.failedLinks == 0);
+    assert(report.failedNodes == 2);
+    assert(report.connectedAfter);
+
+    std::cout << "[PASS] Multiple Node Failures\n";
+}
+
+
+
+
+
+
+void testMixedFailures() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(1, 4);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(2, 5);
+    network.addEdge(3, 5);
+    network.addEdge(4, 5);
+
+    std::vector<FailureEvent> events = {
+        {FailureType::LINK, 1, 2},
+        {FailureType::NODE, 3, 0},
+        {FailureType::LINK, 4, 5}
+    };
+
+    MultiFailureReport report =
+        network.analyzeMultipleFailures(events);
+
+    assert(report.totalFailures == 3);
+    assert(report.failedLinks == 2);
+    assert(report.failedNodes == 1);
+    assert(report.connectedAfter);
+
+    std::cout << "[PASS] Mixed Failure Analysis\n";
+}
+
+
+
+
+
+void testMultipleFailureSeverity() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(1, 4);
+    network.addEdge(2, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+
+    // One failure → LOW
+    {
+        std::vector<FailureEvent> events = {
+            {FailureType::LINK, 1, 2}
+        };
+
+        MultiFailureReport report =
+            network.analyzeMultipleFailures(events);
+
+        assert(report.severity == FailureSeverity::LOW);
+    }
+
+    // Two failures → MODERATE
+    {
+        std::vector<FailureEvent> events = {
+            {FailureType::LINK, 1, 2},
+            {FailureType::LINK, 1, 3}
+        };
+
+        MultiFailureReport report =
+            network.analyzeMultipleFailures(events);
+
+        assert(report.severity == FailureSeverity::MODERATE);
+    }
+
+    // Two node failures → HIGH
+    {
+        std::vector<FailureEvent> events = {
+            {FailureType::NODE, 2, 0},
+            {FailureType::NODE, 3, 0}
+        };
+
+        MultiFailureReport report =
+            network.analyzeMultipleFailures(events);
+
+        assert(report.severity == FailureSeverity::HIGH);
+    }
+
+    std::cout << "[PASS] Multiple Failure Severity\n";
+}
+
+
+
+
 
 
 
@@ -935,6 +1087,11 @@ int main() {
     testResilienceScore();
     testFailedRecoveryScore();
     testPartialResilienceScore();
+
+    testMultipleLinkFailures();
+    testMultipleNodeFailures();
+    testMixedFailures();
+    testMultipleFailureSeverity();
 
     return 0;
 }
