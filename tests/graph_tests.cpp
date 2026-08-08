@@ -1,6 +1,8 @@
 #include "graph.hpp"//access to graph class
 #include <cassert>//assert()
 #include <iostream>
+#include <vector>
+
 
 void testAddNode() {
 
@@ -132,6 +134,25 @@ void testNonExistentEdge() {
 
 
 
+void testBFS() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+
+    std::vector<int> expected = {1, 2, 3, 4, 5};
+    std::vector<int> actual = network.bfs(1);
+
+    assert(actual == expected);
+
+    std::cout << "[PASS] BFS Traversal\n";
+}
+
+
+
+
 int main() {
 
     testAddNode();
@@ -142,7 +163,7 @@ int main() {
     testRemoveNode();
     testNonExistentNode();
     testNonExistentEdge();
-
+    testBFS();
 
     return 0;
 }

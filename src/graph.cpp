@@ -1,6 +1,8 @@
 #include "graph.hpp" //this belongs to graph class
 #include <iostream>
 #include <algorithm>
+#include <queue>
+#include <unordered_set>
 
 void Graph::addNode(int node){
     if(adjacencyList.find(node) == adjacencyList.end()){//checking if the node already exists
@@ -118,6 +120,41 @@ bool Graph::hasEdge(int source, int destination) const {
         destination
     ) != neighbours.end();
 }
+
+
+
+
+std::vector<int> Graph::bfs(int startNode) const {
+    std::vector<int> result;
+
+    if (!hasNode(startNode)) {
+        return result;
+    }
+
+    std::queue<int> queue;
+    std::unordered_set<int> visited;
+
+    queue.push(startNode);
+    visited.insert(startNode);
+
+    while (!queue.empty()) {
+        int currentNode = queue.front();
+        queue.pop();
+
+        result.push_back(currentNode);
+
+        for (int neighbour : adjacencyList.at(currentNode)) {
+            if (visited.find(neighbour) == visited.end()) {
+                visited.insert(neighbour);
+                queue.push(neighbour);
+            }
+        }
+    }
+
+    return result;
+}
+
+
 
 
 

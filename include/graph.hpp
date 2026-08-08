@@ -18,6 +18,8 @@ public:
     bool hasNode(int node) const;
     bool hasEdge(int source, int destination) const;
 
+    std::vector<int> bfs(int startNode) const;
+
     void display() const;
 };
 

@@ -39,7 +39,7 @@ int main() {
 }*/
 
 
-#include "graph.hpp"
+/*#include "graph.hpp"
 #include <iostream>
 
 int main() {
@@ -60,6 +60,30 @@ int main() {
 
     std::cout << "Edge 1-3 exists: "
               << network.hasEdge(1, 3) << "\n";
+
+    return 0;
+}*/
+
+#include "graph.hpp"
+#include <iostream>
+
+int main() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+
+    std::vector<int> result = network.bfs(1);
+
+    std::cout << "BFS from node 1: ";
+
+    for (int node : result) {
+        std::cout << node << " ";
+    }
+
+    std::cout << '\n';
 
     return 0;
 }
