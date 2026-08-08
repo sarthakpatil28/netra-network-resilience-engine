@@ -352,3 +352,17 @@ double Graph::networkHealthScore(int startNode) const {
 
     return score;
 }
+
+
+
+
+
+
+double Graph::healthImpact(double beforeScore, double afterScore) const {
+    return beforeScore - afterScore;
+}
+
+
+
+
+

@@ -418,6 +418,52 @@ void testInvalidHealthScoreNode() {
 
 
 
+void testZeroHealthImpact() {
+    Graph network;
+
+    double impact = network.healthImpact(100.0, 100.0);
+
+    assert(impact == 0.0);
+
+    std::cout << "[PASS] Zero Health Impact\n";
+}
+
+
+
+
+
+
+void testPartialHealthImpact() {
+    Graph network;
+
+    double impact = network.healthImpact(100.0, 60.0);
+
+    assert(impact == 40.0);
+
+    std::cout << "[PASS] Partial Health Impact\n";
+}
+
+
+
+
+
+
+
+
+void testCompleteHealthImpact() {
+    Graph network;
+
+    double impact = network.healthImpact(100.0, 0.0);
+
+    assert(impact == 100.0);
+
+    std::cout << "[PASS] Complete Health Impact\n";
+}
+
+
+
+
+
 
 int main() {
 
@@ -441,6 +487,10 @@ int main() {
     testHealthyNetworkScore();
     testPartialNetworkScore();
     testInvalidHealthScoreNode();
+    
+    testZeroHealthImpact();
+    testPartialHealthImpact();
+    testCompleteHealthImpact();
 
 
     return 0;
