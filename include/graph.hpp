@@ -28,6 +28,22 @@ enum class FailureSeverity {
 
 
 
+enum class FailureType {
+    LINK,
+    NODE
+};
+
+
+
+struct FailureEvent {
+    FailureType type;
+    int source;
+    int destination;
+};
+
+
+
+
 class Graph {
 private:
     std::unordered_map<int, std::vector<int>> adjacencyList;
@@ -59,7 +75,7 @@ public:
     FailureReport analyzeNodeFailure(int startNode,int failedNode) const;
 
     FailureSeverity classifyFailure(const FailureReport& report) const;
-
+    FailureReport simulateFailure(int startNode,const FailureEvent& event) const;
 
     void display() const;
 };

@@ -481,3 +481,30 @@ FailureSeverity Graph::classifyFailure(
 
     return FailureSeverity::CRITICAL;
 }
+
+
+
+
+
+FailureReport Graph::simulateFailure(
+    int startNode,
+    const FailureEvent& event
+) const {
+
+    if (event.type == FailureType::LINK) {
+        return analyzeLinkFailure(
+            startNode,
+            event.source,
+            event.destination
+        );
+    }
+
+    if (event.type == FailureType::NODE) {
+        return analyzeNodeFailure(
+            startNode,
+            event.source
+        );
+    }
+
+    return analyzeFailure(startNode);
+}

@@ -603,6 +603,80 @@ void testNodeFailureAnalysis() {
 
 
 
+void testSimulateLinkFailure() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+    network.addEdge(4, 5);
+
+    FailureEvent event{
+        FailureType::LINK,
+        1,
+        3
+    };
+
+    FailureReport report =
+        network.simulateFailure(1, event);
+
+    assert(report.healthBefore == 100.0);
+    assert(report.healthAfter == 100.0);
+    assert(report.healthImpact == 0.0);
+
+    assert(report.componentsBefore == 1);
+    assert(report.componentsAfter == 1);
+
+    assert(report.connectedBefore);
+    assert(report.connectedAfter);
+
+    assert(
+        network.classifyFailure(report)
+        == FailureSeverity::LOW
+    );
+
+    std::cout << "[PASS] Simulate Link Failure\n";
+}
+
+
+
+
+
+void testSimulateNodeFailure() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+
+    FailureEvent event{
+        FailureType::NODE,
+        3,
+        0
+    };
+
+    FailureReport report =
+        network.simulateFailure(1, event);
+
+    assert(report.healthBefore == 100.0);
+    assert(report.healthAfter == 75.0);
+    assert(report.healthImpact == 25.0);
+
+    assert(report.componentsBefore == 1);
+    assert(report.componentsAfter == 2);
+
+    assert(report.connectedBefore);
+    assert(!report.connectedAfter);
+
+    assert(
+        network.classifyFailure(report)
+        == FailureSeverity::HIGH
+    );
+
+    std::cout << "[PASS] Simulate Node Failure\n";
+}
 
 
 
@@ -644,6 +718,8 @@ int main() {
     testModerateSeverity();
     testHighSeverity();
     testCriticalSeverity();
+    testSimulateLinkFailure();
+    testSimulateNodeFailure();
 
 
     return 0;
