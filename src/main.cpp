@@ -64,7 +64,7 @@ int main() {
     return 0;
 }*/
 
-#include "graph.hpp"
+/*#include "graph.hpp"
 #include <iostream>
 
 int main() {
@@ -80,6 +80,55 @@ int main() {
     std::cout << "BFS from node 1: ";
 
     for (int node : result) {
+        std::cout << node << " ";
+    }
+
+    std::cout << '\n';
+
+    return 0;
+}*/
+
+
+/*#include "graph.hpp"
+#include <iostream>
+
+int main() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+
+    auto distances = network.bfsDistances(1);
+
+    std::cout << "BFS distances from node 1:\n";
+
+    for (const auto& [node, distance] : distances) {
+        std::cout << "Node " << node
+                  << " -> " << distance << " hops\n";
+    }
+
+    return 0;
+}*/
+
+
+#include "graph.hpp"
+#include <iostream>
+
+int main() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+
+    auto path = network.shortestPath(1, 5);
+
+    std::cout << "Shortest path from 1 to 5: ";
+
+    for (int node : path) {
         std::cout << node << " ";
     }
 

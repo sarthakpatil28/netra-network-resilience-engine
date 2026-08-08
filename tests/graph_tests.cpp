@@ -152,6 +152,51 @@ void testBFS() {
 
 
 
+void testBFSDistances() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+
+    auto distances = network.bfsDistances(1);
+
+    assert(distances.at(1) == 0);
+    assert(distances.at(2) == 1);
+    assert(distances.at(3) == 1);
+    assert(distances.at(4) == 2);
+    assert(distances.at(5) == 2);
+
+    std::cout << "[PASS] BFS Distances\n";
+}
+
+
+
+void testShortestPath() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 5);
+
+    auto pathTo5 = network.shortestPath(1, 5);
+    assert(pathTo5 == std::vector<int>({1, 3, 5}));
+
+    auto pathTo4 = network.shortestPath(1, 4);
+    assert(pathTo4 == std::vector<int>({1, 2, 4}));
+
+    auto pathToSelf = network.shortestPath(1, 1);
+    assert(pathToSelf == std::vector<int>({1}));
+
+    auto pathToMissing = network.shortestPath(1, 99);
+    assert(pathToMissing.empty());
+
+    std::cout << "[PASS] Shortest Path\n";
+}
+
+
 
 int main() {
 
@@ -164,6 +209,8 @@ int main() {
     testNonExistentNode();
     testNonExistentEdge();
     testBFS();
+    testBFSDistances();
+    testShortestPath();
 
     return 0;
 }

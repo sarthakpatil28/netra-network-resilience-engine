@@ -157,6 +157,90 @@ std::vector<int> Graph::bfs(int startNode) const {
 
 
 
+std::unordered_map<int, int> Graph::bfsDistances(int startNode) const {
+    std::unordered_map<int, int> distances;
+    std::queue<int> queue;
+
+    if (!hasNode(startNode)) {
+        return distances;
+    }
+
+    distances[startNode] = 0;
+    queue.push(startNode);
+
+    while (!queue.empty()) {
+        int currentNode = queue.front();
+        queue.pop();
+
+        for (int neighbour : adjacencyList.at(currentNode)) {
+            if (distances.find(neighbour) == distances.end()) {
+                distances[neighbour] = distances[currentNode] + 1;
+                queue.push(neighbour);
+            }
+        }
+    }
+
+    return distances;
+}
+
+
+
+
+
+std::vector<int> Graph::shortestPath(int startNode, int targetNode) const {
+    std::vector<int> path;
+
+    if (!hasNode(startNode) || !hasNode(targetNode)) { //checking if the nodes exist
+        return path;
+    }
+
+    std::queue<int> queue;
+    std::unordered_set<int> visited;
+    std::unordered_map<int, int> parent;
+
+    queue.push(startNode);
+    visited.insert(startNode);
+
+    while (!queue.empty()) {
+        int currentNode = queue.front();
+        queue.pop();
+
+        if (currentNode == targetNode) {
+            break;
+        }
+
+        for (int neighbour : adjacencyList.at(currentNode)) {
+            if (visited.find(neighbour) == visited.end()) {
+                visited.insert(neighbour);
+                parent[neighbour] = currentNode;
+                queue.push(neighbour);
+            }
+        }
+    }
+
+    if (startNode != targetNode &&
+        parent.find(targetNode) == parent.end()) {
+        return path;
+    }
+
+    int currentNode = targetNode;
+
+    while (currentNode != startNode) {
+        path.push_back(currentNode);
+        currentNode = parent.at(currentNode);
+    }
+
+    path.push_back(startNode);
+
+    std::reverse(path.begin(), path.end());
+
+    return path;
+}
+
+
+
+
+
 
 void Graph::display() const{
     for(const auto& pair : adjacencyList){ // loop to go through every entry in out adjacencyList

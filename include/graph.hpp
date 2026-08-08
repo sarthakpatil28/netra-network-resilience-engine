@@ -19,7 +19,10 @@ public:
     bool hasEdge(int source, int destination) const;
 
     std::vector<int> bfs(int startNode) const;
+    std::unordered_map<int, int> bfsDistances(int startNode) const;
+    std::vector<int> shortestPath(int startNode, int targetNode) const;
 
+    
     void display() const;
 };
 
