@@ -240,6 +240,26 @@ std::vector<int> Graph::shortestPath(int startNode, int targetNode) const {
 
 
 
+std::vector<int> Graph::resilientPath(int startNode,int destinationNode) const {
+    
+    std::vector<int> path = shortestPath(startNode, destinationNode);
+
+    if (path.empty()) {
+        return {};
+    }
+
+    // Verify that every consecutive pair is still connected.
+    for (size_t i = 0; i + 1 < path.size(); ++i) {
+        if (!hasEdge(path[i], path[i + 1])) {
+            return {};
+        }
+    }
+
+    return path;
+}
+
+
+
 
 
 void Graph::display() const{

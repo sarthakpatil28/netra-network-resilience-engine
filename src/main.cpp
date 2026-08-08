@@ -113,7 +113,7 @@ int main() {
 }*/
 
 
-#include "graph.hpp"
+/*#include "graph.hpp"
 #include <iostream>
 
 int main() {
@@ -133,6 +133,58 @@ int main() {
     }
 
     std::cout << '\n';
+
+    return 0;
+}*/
+
+
+
+
+
+
+#include "graph.hpp"
+#include <iostream>
+
+int main() {
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+    network.addEdge(3, 5);
+
+    std::cout << "Before failure:\n";
+
+    auto pathBefore = network.resilientPath(1, 5);
+
+    std::cout << "Route: ";
+
+    for (int node : pathBefore) {
+        std::cout << node << " ";
+    }
+
+    std::cout << "\n";
+
+    // Simulate network link failure
+    network.removeEdge(1, 3);
+
+    std::cout << "\nAfter failure of link 1-3:\n";
+
+    auto pathAfter = network.resilientPath(1, 5);
+
+    if (pathAfter.empty()) {
+        std::cout << "No route available\n";
+    } else {
+        std::cout << "Route: ";
+
+        for (int node : pathAfter) {
+            std::cout << node << " ";
+        }
+
+        std::cout << "\n";
+    }
 
     return 0;
 }

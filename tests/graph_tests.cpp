@@ -198,6 +198,109 @@ void testShortestPath() {
 
 
 
+
+
+void testAlternateRouteAfterFailure() {
+    Graph network;
+
+    // Create a redundant network
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+    network.addEdge(3, 5);
+
+    // Original shortest route
+    auto originalPath = network.shortestPath(1, 5);
+
+    assert(originalPath == std::vector<int>({1, 3, 5}));
+
+    // Simulate failure of link 1-3
+    network.removeEdge(1, 3);
+
+    // NETRA should find the alternate route
+    auto alternatePath = network.shortestPath(1, 5);
+
+    assert(alternatePath == std::vector<int>({1, 2, 4, 5}));
+
+    std::cout << "[PASS] Alternate Route After Failure\n";
+}
+
+
+
+
+
+
+void testResilientPath() {
+    Graph network;
+
+    // Create a network with two possible routes from 1 to 5
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+    network.addEdge(3, 5);
+
+    // Check the original route
+    auto originalPath = network.resilientPath(1, 5);
+
+    assert(originalPath == std::vector<int>({1, 3, 5}));
+
+    // Simulate failure of the current route
+    network.removeEdge(1, 3);
+
+    // NETRA should recover using the alternate route
+    auto recoveredPath = network.resilientPath(1, 5);
+
+    assert(recoveredPath == std::vector<int>({1, 2, 4, 5}));
+
+    std::cout << "[PASS] Resilient Path Recovery\n";
+}
+
+
+
+
+
+
+
+void testNodeFailureRecovery() {
+    Graph network;
+
+    // Create two possible routes from 1 to 5
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+    network.addEdge(3, 5);
+
+    // Verify the original route
+    auto originalPath = network.resilientPath(1, 5);
+
+    assert(originalPath == std::vector<int>({1, 3, 5}));
+
+    // Simulate complete failure of node 3
+    network.removeNode(3);
+
+    // Node 3 should no longer exist
+    assert(!network.hasNode(3));
+
+    // NETRA should find the alternate route
+    auto recoveredPath = network.resilientPath(1, 5);
+
+    assert(recoveredPath == std::vector<int>({1, 2, 4, 5}));
+
+    std::cout << "[PASS] Node Failure Recovery\n";
+}
+
+
+
+
+
+
+
 int main() {
 
     testAddNode();
@@ -211,6 +314,9 @@ int main() {
     testBFS();
     testBFSDistances();
     testShortestPath();
+    testAlternateRouteAfterFailure();
+    testResilientPath();
+    testNodeFailureRecovery();
 
     return 0;
 }

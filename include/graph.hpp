@@ -21,8 +21,8 @@ public:
     std::vector<int> bfs(int startNode) const;
     std::unordered_map<int, int> bfsDistances(int startNode) const;
     std::vector<int> shortestPath(int startNode, int targetNode) const;
+    std::vector<int> resilientPath(int startNode, int destinationNode) const;
 
-    
     void display() const;
 };
 
