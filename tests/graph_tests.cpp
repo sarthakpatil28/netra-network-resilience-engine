@@ -2,7 +2,7 @@
 #include <cassert>//assert()
 #include <iostream>
 #include <vector>
-
+#include <fstream>
 
 void testAddNode() {
 
@@ -1041,6 +1041,302 @@ void testMultipleFailureSeverity() {
 
 
 
+void testComponentRiskAnalysis() {
+
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+    network.addEdge(3, 5);
+
+    auto risks = network.analyzeComponentRisk(1);
+
+    // The network has 5 nodes and 6 unique links.
+    // Therefore we expect 11 components to be analyzed.
+    assert(risks.size() == 10);
+
+    // Results should be sorted from highest risk to lowest risk.
+    for (size_t i = 1; i < risks.size(); ++i) {
+        assert(
+            risks[i - 1].riskScore >=
+            risks[i].riskScore
+        );
+    }
+
+    // Verify that both node and link failures are represented.
+    bool foundNode = false;
+    bool foundLink = false;
+
+    for (const auto& risk : risks) {
+
+        if (risk.type == FailureType::NODE) {
+            foundNode = true;
+
+            assert(risk.destination == -1);
+        }
+
+        if (risk.type == FailureType::LINK) {
+            foundLink = true;
+
+            assert(risk.destination != -1);
+        }
+    }
+
+    assert(foundNode);
+    assert(foundLink);
+
+    std::cout << "[PASS] Component Risk Analysis\n";
+}
+
+
+void testInvalidComponentRiskStartNode() {
+
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(2, 3);
+
+    auto risks =
+        network.analyzeComponentRisk(99);
+
+    assert(risks.empty());
+
+    std::cout << "[PASS] Invalid Component Risk Start Node\n";
+}
+
+
+
+
+
+
+
+
+
+
+void testLoadValidNetwork() {
+
+    Graph network;
+
+    std::ofstream file("test_valid_network.txt");
+
+    file << "1 2\n";
+    file << "1 3\n";
+    file << "2 4\n";
+    file << "3 4\n";
+    file << "4 5\n";
+
+    file.close();
+
+    assert(network.loadFromFile("test_valid_network.txt"));
+
+    assert(network.hasNode(1));
+    assert(network.hasNode(5));
+
+    assert(network.hasEdge(1, 2));
+    assert(network.hasEdge(1, 3));
+    assert(network.hasEdge(4, 5));
+
+    std::remove("test_valid_network.txt");
+
+    std::cout << "[PASS] Load Valid Network\n";
+}
+
+
+void testLoadMissingFile() {
+
+    Graph network;
+
+    assert(
+        !network.loadFromFile(
+            "this_file_does_not_exist.txt"
+        )
+    );
+
+    std::cout << "[PASS] Missing Network File\n";
+}
+
+
+void testLoadEmptyFile() {
+
+    Graph network;
+
+    std::ofstream file("test_empty_network.txt");
+    file.close();
+
+    assert(
+        !network.loadFromFile(
+            "test_empty_network.txt"
+        )
+    );
+
+    std::remove("test_empty_network.txt");
+
+    std::cout << "[PASS] Empty Network File\n";
+}
+
+
+void testLoadSelfLoop() {
+
+    Graph network;
+
+    std::ofstream file("test_self_loop.txt");
+
+    file << "1 2\n";
+    file << "2 2\n";
+
+    file.close();
+
+    assert(
+        !network.loadFromFile(
+            "test_self_loop.txt"
+        )
+    );
+
+    std::remove("test_self_loop.txt");
+
+    std::cout << "[PASS] Self Loop File Rejection\n";
+}
+
+
+void testLoadInvalidNode() {
+
+    Graph network;
+
+    std::ofstream file("test_invalid_node.txt");
+
+    file << "1 2\n";
+    file << "-1 3\n";
+
+    file.close();
+
+    assert(
+        !network.loadFromFile(
+            "test_invalid_node.txt"
+        )
+    );
+
+    std::remove("test_invalid_node.txt");
+
+    std::cout << "[PASS] Invalid Node File Rejection\n";
+}
+
+
+void testLoadMalformedFile() {
+
+    Graph network;
+
+    std::ofstream file("test_malformed_network.txt");
+
+    file << "1 2\n";
+    file << "2 3\n";
+    file << "invalid data\n";
+
+    file.close();
+
+    assert(
+        !network.loadFromFile(
+            "test_malformed_network.txt"
+        )
+    );
+
+    std::remove("test_malformed_network.txt");
+
+    std::cout << "[PASS] Malformed Network File Rejection\n";
+}
+
+
+void testLoadDuplicateEdges() {
+
+    Graph network;
+
+    std::ofstream file("test_duplicate_network.txt");
+
+    file << "1 2\n";
+    file << "1 2\n";
+    file << "2 1\n";
+    file << "2 3\n";
+
+    file.close();
+
+    assert(
+        network.loadFromFile(
+            "test_duplicate_network.txt"
+        )
+    );
+
+    assert(network.hasEdge(1, 2));
+    assert(network.hasEdge(2, 3));
+
+    std::remove("test_duplicate_network.txt");
+
+    std::cout << "[PASS] Duplicate Edge Handling\n";
+}
+
+
+
+
+
+
+void testNetworkStatistics() {
+
+    Graph network;
+
+    network.addEdge(1, 2);
+    network.addEdge(1, 3);
+    network.addEdge(2, 4);
+    network.addEdge(3, 4);
+    network.addEdge(4, 5);
+    network.addEdge(3, 5);
+
+    NetworkStatistics stats =
+        network.getNetworkStatistics();
+
+    assert(stats.nodes == 5);
+    assert(stats.links == 6);
+
+    assert(stats.connectedComponents == 1);
+    assert(stats.connected == true);
+
+    assert(stats.averageDegree == 2.4);
+
+    assert(stats.minimumDegree == 2);
+    assert(stats.maximumDegree == 3);
+
+    assert(stats.mostConnectedNodeDegree == 3);
+
+    assert(stats.density == 0.6);
+
+    std::cout
+        << "[PASS] Network Statistics\n";
+}
+
+
+
+void testWeightedShortestPath() {
+
+    Graph network;
+
+    network.addWeightedEdge(1, 2, 10);
+    network.addWeightedEdge(1, 3, 2);
+    network.addWeightedEdge(3, 4, 2);
+    network.addWeightedEdge(4, 2, 2);
+
+    auto path =
+        network.weightedShortestPath(1, 2);
+
+    assert(path.size() == 4);
+
+    assert(path[0] == 1);
+    assert(path[1] == 3);
+    assert(path[2] == 4);
+    assert(path[3] == 2);
+
+    std::cout
+        << "[PASS] Weighted Shortest Path\n";
+}
 
 
 
@@ -1057,6 +1353,7 @@ int main() {
     testBFS();
     testBFSDistances();
     testShortestPath();
+    testWeightedShortestPath();
     testAlternateRouteAfterFailure();
     testResilientPath();
     testNodeFailureRecovery();
@@ -1092,6 +1389,19 @@ int main() {
     testMultipleNodeFailures();
     testMixedFailures();
     testMultipleFailureSeverity();
+
+    testComponentRiskAnalysis();
+    testInvalidComponentRiskStartNode();
+
+    testLoadValidNetwork();
+    testLoadMissingFile();
+    testLoadEmptyFile();
+    testLoadSelfLoop();
+    testLoadInvalidNode();
+    testLoadMalformedFile();
+    testLoadDuplicateEdges();
+
+    testNetworkStatistics();
 
     return 0;
 }

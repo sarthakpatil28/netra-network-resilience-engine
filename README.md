@@ -1,56 +1,57 @@
-# NETRA — Network Resilience Engine
+# NETRA — Network Resilience & Self-Healing Routing Engine
 
-NETRA is a modular C++ network simulation and self-healing routing engine designed to detect network abnormalities, analyze network topology, and dynamically recover communication paths.
+NETRA is a C++20-based network simulation and resilience engine that models communication networks using graphs, finds optimal routes, simulates failures, analyzes their impact, and identifies recovery paths.
 
-## Project Vision
+## Features
 
-The goal of NETRA is to develop a software-defined network resilience system that can:
-
-- Model communication networks as dynamic graphs
-- Monitor network health parameters
-- Detect node and link failures
-- Identify abnormal network behavior
-- Calculate optimal communication routes
-- Dynamically reroute traffic around failures
-- Integrate machine learning for anomaly detection
-- Interface with real network hardware in later stages
-
-## Current Development Stage
-
-**Phase 0 — Project Foundation**
-
-The current implementation focuses on establishing the software architecture, build system, testing framework, and development workflow.
-
-## Technology Stack
-
-- C++
-- CMake
-- Ninja
-- Git
-- GitHub
-- GoogleTest
-- Python (future ML layer)
-- ESP32 (future hardware layer)
+- Dynamic node and link management
+- Undirected graph representation using adjacency lists
+- Duplicate-edge and self-loop prevention
+- BFS traversal and distance calculation
+- Unweighted shortest-path routing
+- Weighted shortest-path routing using Dijkstra's algorithm
+- Resilient and alternate path discovery
+- Link and node failure simulation
+- Failure impact and severity analysis
+- Failure recovery analysis
+- Network health scoring
+- Resilience scoring
+- Multiple and mixed failure analysis
+- Component risk analysis
+- Network statistics
+- Unique-link network topology display
+- Loading weighted and unweighted networks from files
+- Interactive command-line interface
+- Automated test suite
 
 ## Architecture
 
 ```text
-Network Data
+Network Input
      |
      v
-Network Model
+Network Adapter
      |
      v
 Graph Engine
      |
-     v
-Routing Engine
+     +---- Routing Engine
+     |       +-- BFS
+     |       +-- Shortest Path
+     |       +-- Weighted Path
+     |       +-- Resilient Path
+     |
+     +---- Failure Engine
+     |       +-- Link Failure
+     |       +-- Node Failure
+     |       +-- Multiple Failures
+     |
+     +---- Analysis Engine
+     |       +-- Health Score
+     |       +-- Resilience Score
+     |       +-- Risk Analysis
+     |
+     +---- Recovery Engine
      |
      v
-Failure Detection
-     |
-     v
-Anomaly Detection
-     |
-     v
-Self-Healing Network
+NETRA CLI

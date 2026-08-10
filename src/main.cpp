@@ -1,6 +1,7 @@
 
 
 #include "graph.hpp"
+#include "network_adapter.hpp"
 
 #include <iostream>
 #include <limits>
@@ -176,7 +177,12 @@ void printMenu() {
     std::cout << "9. Analyze multiple failures\n";
     std::cout << "10. Simulate failure & analyze recovery\n";
     std::cout << "11. Network Health Dashboard\n";
-    std::cout << "12. Exit\n";
+    std::cout << "12. Component Risk Analysis\n";
+    std::cout << "13. Load Network From File\n";
+    std::cout << "14. Network Statistics\n";
+    std::cout << "15. Network Topology\n";
+    std::cout << "16. Find weighted shortest path\n";
+    std::cout << "17. Exit\n";
     std::cout << "========================================\n";
     std::cout << "Enter choice: ";
 }
@@ -797,11 +803,336 @@ int main() {
 
 
 
+
+                    case 12: {
+
+                            int startNode;
+
+                            std::cout
+                                << "\nEnter analysis start node: ";
+
+                            std::cin >> startNode;
+
+                            auto risks =
+                                network.analyzeComponentRisk(startNode);
+
+                            if (risks.empty()) {
+
+                                std::cout
+                                    << "\nNo component risk data available.\n";
+
+                                break;
+                            }
+
+                            std::cout
+                                << "\n"
+                                << "============================================================\n"
+                                << "              NETRA COMPONENT RISK ANALYSIS\n"
+                                << "============================================================\n";
+
+                            std::cout
+                                << "Analysis Start Node : "
+                                << startNode
+                                << "\n\n";
+
+                            std::cout
+                                << "Component"
+                                << "\t\tType"
+                                << "\t\tRisk Score"
+                                << "\tSeverity\n";
+
+                            std::cout
+                                << "------------------------------------------------------------\n";
+
+                            for (const auto& risk : risks) {
+
+                                if (risk.type == FailureType::NODE) {
+
+                                    std::cout
+                                        << "Node "
+                                        << risk.source
+                                        << "\t\tNODE"
+                                        << "\t\t"
+                                        << risk.riskScore
+                                        << "%"
+                                        << "\t\t"
+                                        << severityToString(risk.severity)
+                                        << "\n";
+
+                                } else {
+
+                                    std::cout
+                                        << "Link "
+                                        << risk.source
+                                        << " - "
+                                        << risk.destination
+                                        << "\t\tLINK"
+                                        << "\t\t"
+                                        << risk.riskScore
+                                        << "%"
+                                        << "\t\t"
+                                        << severityToString(risk.severity)
+                                        << "\n";
+                                }
+                            }
+
+                            const auto& highestRisk = risks.front();
+
+                            std::cout
+                                << "\n------------------------------------------------------------\n"
+                                << "MOST CRITICAL COMPONENT\n"
+                                << "------------------------------------------------------------\n";
+
+                            if (highestRisk.type == FailureType::NODE) {
+
+                                std::cout
+                                    << "Component : Node "
+                                    << highestRisk.source
+                                    << "\n";
+
+                            } else {
+
+                                std::cout
+                                    << "Component : Link "
+                                    << highestRisk.source
+                                    << " - "
+                                    << highestRisk.destination
+                                    << "\n";
+                            }
+
+                            std::cout
+                                << "Risk Score : "
+                                << highestRisk.riskScore
+                                << "%\n"
+                                << "Severity   : "
+                                << severityToString(highestRisk.severity)
+                                << "\n";
+
+                            std::cout
+                                << "============================================================\n";
+
+                            break;
+                        }
+
+
+
+
+
+
+                case 13: {
+
+                    std::string filename;
+
+                    std::cout << "\nEnter network file: ";
+                    std::cin >> filename;
+
+                    if (NetworkAdapter::loadTopology(filename, network)) {
+
+                        std::cout
+                            << "\nNetwork loaded successfully.\n";
+
+                        std::cout
+                            << "----------------------------------------\n";
+
+                        network.display();
+
+                        std::cout
+                            << "----------------------------------------\n";
+
+                        std::cout
+                            << "Connected : "
+                            << (network.isConnected() ? "YES" : "NO")
+                            << "\n";
+
+                        std::cout
+                            << "Components: "
+                            << network.connectedComponents()
+                            << "\n";
+
+                    } else {
+
+                        std::cout
+                            << "\nError: Could not load network file.\n";
+                    }
+
+                    break;
+                }
+
+
+
+
+                case 14: {
+
+                    NetworkStatistics stats =
+                        network.getNetworkStatistics();
+
+                    std::cout
+                        << "\n";
+                    std::cout
+                        << "============================================================\n";
+                    std::cout
+                        << "              NETRA NETWORK STATISTICS\n";
+                    std::cout
+                        << "============================================================\n";
+
+                    std::cout
+                        << "Nodes                 : "
+                        << stats.nodes
+                        << "\n";
+
+                    std::cout
+                        << "Links                 : "
+                        << stats.links
+                        << "\n";
+
+                    std::cout
+                        << "Connected Components  : "
+                        << stats.connectedComponents
+                        << "\n";
+
+                    std::cout
+                        << "Connected             : "
+                        << (stats.connected ? "YES" : "NO")
+                        << "\n";
+
+                    std::cout
+                        << "Average Degree        : "
+                        << stats.averageDegree
+                        << "\n";
+
+                    std::cout
+                        << "Minimum Degree        : "
+                        << stats.minimumDegree
+                        << "\n";
+
+                    std::cout
+                        << "Maximum Degree        : "
+                        << stats.maximumDegree
+                        << "\n";
+
+                    std::cout
+                        << "Network Density       : "
+                        << stats.density * 100
+                        << "%\n";
+
+                    std::cout
+                        << "Most Connected Node   : "
+                        << stats.mostConnectedNode
+                        << "\n";
+
+                    std::cout
+                        << "Node Degree           : "
+                        << stats.mostConnectedNodeDegree
+                        << "\n";
+
+                    std::cout
+                        << "============================================================\n";
+
+                    break;
+                }
+
+
+                case 15: {
+
+                    network.displayTopology();
+
+                    break;
+                }
+
+                case 16: {
+
+                    int startNode;
+                    int destinationNode;
+
+                    std::cout << "\nEnter start node: ";
+                    std::cin >> startNode;
+
+                    std::cout << "Enter destination node: ";
+                    std::cin >> destinationNode;
+
+                    std::vector<int> path =
+                        network.weightedShortestPath(
+                            startNode,
+                            destinationNode
+                        );
+
+                    if (path.empty()) {
+
+                        std::cout
+                            << "\nNo weighted path exists between "
+                            << startNode
+                            << " and "
+                            << destinationNode
+                            << ".\n";
+
+                    } else {
+
+                        std::cout
+                            << "\n========== WEIGHTED SHORTEST PATH ==========\n";
+
+                        std::cout
+                            << "Start       : "
+                            << startNode
+                            << "\n";
+
+                        std::cout
+                            << "Destination : "
+                            << destinationNode
+                            << "\n";
+
+                        std::cout
+                            << "Path        : ";
+
+                        for (size_t i = 0; i < path.size(); ++i) {
+
+                            std::cout << path[i];
+
+                            if (i + 1 < path.size()) {
+                                std::cout << " -> ";
+                            }
+                        }
+
+                        std::cout << "\n";
+
+                        double totalWeight = 0.0;
+
+                        for (size_t i = 0;
+                            i + 1 < path.size();
+                            ++i) {
+
+                            double weight =
+                                network.getEdgeWeight(
+                                    path[i],
+                                    path[i + 1]
+                                );
+
+                            if (weight < 0.0) {
+                                weight = 1.0;
+                            }
+
+                            totalWeight += weight;
+                        }
+
+                        std::cout
+                            << "Total Weight: "
+                            << totalWeight
+                            << "\n";
+
+                        std::cout
+                            << "============================================\n";
+                    }
+
+                    break;
+                }
+
+
+
+
             // ==========================================
             // EXIT
             // ==========================================
 
-            case 12:
+            case 17:
 
                 std::cout
                     << "Exiting NETRA.\n";

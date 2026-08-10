@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 #include <vector>
-
+#include <string>
 
 
 
@@ -80,6 +80,31 @@ struct MultiFailureReport {
     FailureSeverity severity;
 };
 
+struct ComponentRisk {
+    FailureType type;
+    int source;
+    int destination;
+    double riskScore;
+    FailureSeverity severity;
+};
+
+
+
+struct NetworkStatistics {
+    int nodes;
+    int links;
+    int connectedComponents;
+    bool connected;
+
+    double averageDegree;
+    int minimumDegree;
+    int maximumDegree;
+
+    double density;
+
+    int mostConnectedNode;
+    int mostConnectedNodeDegree;
+};
 
 
 
@@ -88,9 +113,23 @@ class Graph {
 private:
     std::unordered_map<int, std::vector<int>> adjacencyList;
 
+    // Stores the weight/cost of each undirected edge.
+    std::unordered_map<int,
+        std::unordered_map<int, double>> edgeWeights;
+
 public:
     void addNode(int node);
     void addEdge(int source, int destination);
+
+    void addWeightedEdge(
+        int source,
+        int destination,
+        double weight
+    );
+
+    double getEdgeWeight(int source, int destination) const;
+
+
 
     void removeNode(int node);
     void removeEdge(int source, int destination);
@@ -102,7 +141,10 @@ public:
     std::unordered_map<int, int> bfsDistances(int startNode) const;
     std::vector<int> shortestPath(int startNode, int targetNode) const;
     std::vector<int> resilientPath(int startNode, int destinationNode) const;
-
+    std::vector<int> weightedShortestPath(
+    int startNode,
+    int targetNode
+) const;
 
     int connectedComponents() const;
     bool isConnected() const;
@@ -141,8 +183,16 @@ public:
         const std::vector<FailureEvent>& events
     ) const;
 
+    std::vector<ComponentRisk> analyzeComponentRisk(
+        int startNode
+    ) const;
+
+    bool loadFromFile(const std::string& filename);
+
+    NetworkStatistics getNetworkStatistics() const;
 
     void display() const;
+    void displayTopology() const;
 };
 
 #endif
