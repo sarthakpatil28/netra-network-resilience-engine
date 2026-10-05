@@ -176,13 +176,16 @@ void printMenu() {
     std::cout << "8. Analyze node failure\n";
     std::cout << "9. Analyze multiple failures\n";
     std::cout << "10. Simulate failure & analyze recovery\n";
-    std::cout << "11. Network Health Dashboard\n";
+   std::cout << "11. Network Health Dashboard\n";
     std::cout << "12. Component Risk Analysis\n";
-    std::cout << "13. Load Network From File\n";
-    std::cout << "14. Network Statistics\n";
-    std::cout << "15. Network Topology\n";
-    std::cout << "16. Find weighted shortest path\n";
-    std::cout << "17. Exit\n";
+    std::cout << "13. Add Traffic Flow\n";
+    std::cout << "14. Remove Traffic Flow\n";
+    std::cout << "15. Traffic Dashboard\n";
+    std::cout << "16. Load Network From File\n";
+    std::cout << "17. Network Statistics\n";
+    std::cout << "18. Network Topology\n";
+    std::cout << "19. Find weighted shortest path\n";
+    std::cout << "20. Exit\n";
     std::cout << "========================================\n";
     std::cout << "Enter choice: ";
 }
@@ -917,9 +920,92 @@ int main() {
 
 
 
+                        case 13: {
+
+                            int source;
+                            int destination;
+                            double demand;
+
+                            std::cout << "\n========== ADD TRAFFIC FLOW ==========\n";
+
+                            std::cout << "Enter source node: ";
+                            std::cin >> source;
+
+                            std::cout << "Enter destination node: ";
+                            std::cin >> destination;
+
+                            std::cout << "Enter traffic demand: ";
+                            std::cin >> demand;
+
+                            if (network.addTrafficFlow(source, destination, demand)) {
+
+                                std::cout << "\nTraffic flow added successfully.\n";
+
+                            } else {
+
+                                std::cout << "\nError: Could not add traffic flow.\n";
+                                std::cout << "Check that the nodes exist, the link exists,\n";
+                                std::cout << "the demand is positive, and the flow is not duplicated.\n";
+                            }
+
+                            break;
+                        }
 
 
-                case 13: {
+
+
+
+                        case 14: {
+
+                            int source;
+                            int destination;
+
+                            std::cout << "\n========== REMOVE TRAFFIC FLOW ==========\n";
+
+                            std::cout << "Enter source node: ";
+                            std::cin >> source;
+
+                            std::cout << "Enter destination node: ";
+                            std::cin >> destination;
+
+                            if (network.removeTrafficFlow(source, destination)) {
+
+                                std::cout << "\nTraffic flow removed successfully.\n";
+
+                            } else {
+
+                                std::cout << "\nError: Could not remove traffic flow.\n";
+                                std::cout << "Check that the specified traffic flow exists.\n";
+                            }
+
+                            break;
+                        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            case 15: {
+
+                            network.displayTrafficDashboard();
+
+                            break;
+                        }
+
+
+
+                case 16: {
 
                     std::string filename;
 
@@ -961,7 +1047,7 @@ int main() {
 
 
 
-                case 14: {
+                case 17: {
 
                     NetworkStatistics stats =
                         network.getNetworkStatistics();
@@ -1032,14 +1118,14 @@ int main() {
                 }
 
 
-                case 15: {
+                case 18: {
 
                     network.displayTopology();
 
                     break;
                 }
 
-                case 16: {
+                case 19: {
 
                     int startNode;
                     int destinationNode;
@@ -1132,7 +1218,7 @@ int main() {
             // EXIT
             // ==========================================
 
-            case 17:
+            case 20:
 
                 std::cout
                     << "Exiting NETRA.\n";

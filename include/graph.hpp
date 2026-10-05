@@ -107,6 +107,17 @@ struct NetworkStatistics {
 };
 
 
+struct TrafficFlow {
+    int source;
+    int destination;
+    double demand;
+    std::vector<int> route;
+};
+
+
+
+
+
 
 
 class Graph {
@@ -116,6 +127,16 @@ private:
     // Stores the weight/cost of each undirected edge.
     std::unordered_map<int,
         std::unordered_map<int, double>> edgeWeights;
+    
+    // Stores the capacity of each undirected edge.
+    std::unordered_map<
+        int,
+        std::unordered_map<int, double>>
+    edgeCapacities;
+
+
+    std::vector<TrafficFlow> trafficFlows;
+
 
 public:
     void addNode(int node);
@@ -127,11 +148,28 @@ public:
         double weight
     );
 
+
+    void addWeightedEdgeWithCapacity(
+    int source,
+    int destination,
+    double weight,
+    double capacity
+);
+
     double getEdgeWeight(int source, int destination) const;
+    void setEdgeCapacity(
+        int source,
+        int destination,
+        double capacity
+    );
+
+    double getEdgeCapacity(
+        int source,
+        int destination
+    ) const;
 
 
-
-    void removeNode(int node);
+        void removeNode(int node);
     void removeEdge(int source, int destination);
 
     bool hasNode(int node) const;
@@ -191,6 +229,32 @@ public:
 
     NetworkStatistics getNetworkStatistics() const;
 
+
+    bool addTrafficFlow(
+    int source,
+    int destination,
+    double demand
+);
+
+bool removeTrafficFlow(
+    int source,
+    int destination
+);
+
+std::vector<TrafficFlow> getTrafficFlows() const;
+
+double getLinkUtilization(
+    int source,
+    int destination
+) const;
+
+bool isLinkOverloaded(
+    int source,
+    int destination
+) const;
+
+
+    void displayTrafficDashboard() const;
     void display() const;
     void displayTopology() const;
 };

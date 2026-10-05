@@ -18,7 +18,6 @@ bool NetworkAdapter::loadTopology(
     Graph tempGraph;
 
     std::string line;
-
     bool hasData = false;
 
     while (std::getline(file, line)) {
@@ -32,31 +31,44 @@ bool NetworkAdapter::loadTopology(
         int source;
         int destination;
 
+        // Source and destination must exist.
         if (!(ss >> source >> destination)) {
             return false;
         }
 
+        // Nodes must be positive.
         if (source <= 0 || destination <= 0) {
             return false;
         }
 
+        // Reject self-loops.
         if (source == destination) {
             return false;
         }
 
-        double weight = 1.0;
+        double weight;
 
-        if (ss >> weight) {
+        // Format: source destination
+        if (!(ss >> weight)) {
 
-            if (weight <= 0.0) {
-                return false;
-            }
+            tempGraph.addEdge(
+                source,
+                destination
+            );
 
-            std::string extra;
+            hasData = true;
+            continue;
+        }
 
-            if (ss >> extra) {
-                return false;
-            }
+        // Weight must be positive.
+        if (weight <= 0.0) {
+            return false;
+        }
+
+        double capacity;
+
+        // Format: source destination weight
+        if (!(ss >> capacity)) {
 
             tempGraph.addWeightedEdge(
                 source,
@@ -64,13 +76,30 @@ bool NetworkAdapter::loadTopology(
                 weight
             );
 
-        } else {
-
-            tempGraph.addEdge(
-                source,
-                destination
-            );
+            hasData = true;
+            continue;
         }
+
+        // Capacity must be positive.
+        if (capacity <= 0.0) {
+            return false;
+        }
+
+        // No fourth value allowed.
+        std::string extra;
+
+        if (ss >> extra) {
+            return false;
+        }
+
+        // Format:
+        // source destination weight capacity
+        tempGraph.addWeightedEdgeWithCapacity(
+            source,
+            destination,
+            weight,
+            capacity
+        );
 
         hasData = true;
     }

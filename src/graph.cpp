@@ -1,5 +1,6 @@
 #include "graph.hpp" //this belongs to graph class
 #include "network_adapter.hpp"
+
 #include <iostream>
 #include <algorithm>
 #include <queue>
@@ -35,6 +36,64 @@ void Graph::addEdge(int source, int destination) {
 
 
 
+
+bool Graph::addTrafficFlow(
+    int source,
+    int destination,
+    double demand
+) {
+    // Source and destination must exist.
+    if (!hasNode(source) || !hasNode(destination)) {
+        return false;
+    }
+
+    // Source and destination cannot be the same.
+    if (source == destination) {
+        return false;
+    }
+
+    // Traffic demand must be positive.
+    if (demand <= 0.0) {
+        return false;
+    }
+
+    // A direct connection must exist.
+    if (!hasEdge(source, destination)) {
+        return false;
+    }
+
+    // Prevent duplicate traffic flow.
+    for (const auto& flow : trafficFlows) {
+        if (flow.source == source &&
+            flow.destination == destination) {
+            return false;
+        }
+    }
+
+    // Find a route for the traffic.
+    std::vector<int> route =
+        weightedShortestPath(source, destination);
+
+    if (route.empty()) {
+        return false;
+    }
+
+    TrafficFlow flow;
+
+    flow.source = source;
+    flow.destination = destination;
+    flow.demand = demand;
+    flow.route = route;
+
+    trafficFlows.push_back(flow);
+
+    return true;
+}
+
+
+
+
+
 void Graph::addWeightedEdge(
                 int source,
                 int destination,
@@ -57,6 +116,10 @@ void Graph::addWeightedEdge(
                 // because the graph is undirected.
                 edgeWeights[source][destination] = weight;
                 edgeWeights[destination][source] = weight;
+
+                // Default capacity for a newly created weighted edge.
+                edgeCapacities[source][destination] = 100.0;
+                edgeCapacities[destination][source] = 100.0;
             }
 
 
@@ -89,9 +152,27 @@ void Graph::removeEdge(int source, int destination) {
         source
     );
 
-    // Remove source from destination's list
+    // Remove source from destination's neighbour list
     if (destinationIt != adjacencyList[destination].end()) {
         adjacencyList[destination].erase(destinationIt);
+    }
+
+    // Remove stored edge weight
+    if (edgeWeights.find(source) != edgeWeights.end()) {
+        edgeWeights[source].erase(destination);
+    }
+
+    if (edgeWeights.find(destination) != edgeWeights.end()) {
+        edgeWeights[destination].erase(source);
+    }
+
+    // Remove stored edge capacity
+    if (edgeCapacities.find(source) != edgeCapacities.end()) {
+        edgeCapacities[source].erase(destination);
+    }
+
+    if (edgeCapacities.find(destination) != edgeCapacities.end()) {
+        edgeCapacities[destination].erase(source);
     }
 }
 
@@ -100,32 +181,46 @@ void Graph::removeEdge(int source, int destination) {
 
 void Graph::removeNode(int node) {
 
-    // Check if the node exists
-    auto nodeIt = adjacencyList.find(node);
-
-    if (nodeIt == adjacencyList.end()) {
+    // Check whether node exists
+    if (adjacencyList.find(node) == adjacencyList.end()) {
         return;
     }
 
-    // Make a copy of the node's neighbours
-    auto neighbours = adjacencyList[node];
+    // Remove this node from all of its neighbours
+    for (int neighbor : adjacencyList[node]) {
 
-    // Remove this node from every neighbour's list
-    for (int neighbour : neighbours) {
+        // Remove node from neighbour's adjacency list
+        auto& neighbors = adjacencyList[neighbor];
 
-        auto neighbourIt = std::find(
-            adjacencyList[neighbour].begin(),
-            adjacencyList[neighbour].end(),
+        auto it = std::find(
+            neighbors.begin(),
+            neighbors.end(),
             node
         );
 
-        if (neighbourIt != adjacencyList[neighbour].end()) {
-            adjacencyList[neighbour].erase(neighbourIt);
+        if (it != neighbors.end()) {
+            neighbors.erase(it);
+        }
+
+        // Remove edge weight information
+        if (edgeWeights.find(neighbor) != edgeWeights.end()) {
+            edgeWeights[neighbor].erase(node);
+        }
+
+        // Remove edge capacity information
+        if (edgeCapacities.find(neighbor) != edgeCapacities.end()) {
+            edgeCapacities[neighbor].erase(node);
         }
     }
 
-    // Finally remove the node itself
+    // Remove the node's own adjacency list
     adjacencyList.erase(node);
+
+    // Remove the node's own weight entries
+    edgeWeights.erase(node);
+
+    // Remove the node's own capacity entries
+    edgeCapacities.erase(node);
 }
 
 
@@ -438,7 +533,7 @@ void Graph::displayTopology() const {
         for (int destination : neighbors) {
 
             // Undirected graph:
-            // print each link only once.
+            // count each link only once.
             if (source < destination) {
                 linkCount++;
             }
@@ -455,12 +550,12 @@ void Graph::displayTopology() const {
     }
 
     std::cout << "Connected : "
-          << (isConnected() ? "YES" : "NO")
-          << "\n";
+              << (isConnected() ? "YES" : "NO")
+              << "\n";
 
     std::cout << "Components : "
-            << connectedComponents()
-            << "\n\n";
+              << connectedComponents()
+              << "\n\n";
 
     std::cout << "## Adjacency Topology\n\n";
 
@@ -468,7 +563,8 @@ void Graph::displayTopology() const {
 
         for (int destination : neighbors) {
 
-            // Skip the reverse copy of an undirected edge.
+            // Skip the reverse copy of an
+            // undirected edge.
             if (source >= destination) {
                 continue;
             }
@@ -476,14 +572,27 @@ void Graph::displayTopology() const {
             double weight =
                 getEdgeWeight(source, destination);
 
+            double capacity =
+                getEdgeCapacity(source, destination);
+
             std::cout << "["
                       << source
                       << "] --(";
 
+            // Display weight
             if (weight > 0.0) {
                 std::cout << weight;
             } else {
                 std::cout << "1";
+            }
+
+            std::cout << ", ";
+
+            // Display capacity
+            if (capacity > 0.0) {
+                std::cout << capacity;
+            } else {
+                std::cout << "N/A";
             }
 
             std::cout << ")-- ["
@@ -1471,4 +1580,226 @@ double Graph::getEdgeWeight(
     }
 
     return destinationIt->second;
+}
+
+
+void Graph::setEdgeCapacity(
+    int source,
+    int destination,
+    double capacity
+) {
+    if (!hasEdge(source, destination)) {
+        return;
+    }
+
+    if (capacity <= 0.0) {
+        return;
+    }
+
+    edgeCapacities[source][destination] = capacity;
+    edgeCapacities[destination][source] = capacity;
+}
+
+
+double Graph::getEdgeCapacity(
+    int source,
+    int destination
+) const {
+    auto sourceIt = edgeCapacities.find(source);
+
+    if (sourceIt == edgeCapacities.end()) {
+        return -1.0;
+    }
+
+    auto destinationIt =
+        sourceIt->second.find(destination);
+
+    if (destinationIt == sourceIt->second.end()) {
+        return -1.0;
+    }
+
+    return destinationIt->second;
+}
+
+
+
+void Graph::addWeightedEdgeWithCapacity(
+    int source,
+    int destination,
+    double weight,
+    double capacity
+) {
+    if (source == destination) {
+        return;
+    }
+
+    if (weight <= 0.0 || capacity <= 0.0) {
+        return;
+    }
+
+    addEdge(source, destination);
+
+    edgeWeights[source][destination] = weight;
+    edgeWeights[destination][source] = weight;
+
+    edgeCapacities[source][destination] = capacity;
+    edgeCapacities[destination][source] = capacity;
+}
+
+
+
+
+
+
+
+bool Graph::removeTrafficFlow(
+    int source,
+    int destination
+) {
+    for (auto it = trafficFlows.begin();
+         it != trafficFlows.end();
+         ++it) {
+
+        if (it->source == source &&
+            it->destination == destination) {
+
+            trafficFlows.erase(it);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+
+
+
+
+
+
+double Graph::getLinkUtilization(
+    int source,
+    int destination
+) const {
+    double capacity =
+        getEdgeCapacity(source, destination);
+
+    // Invalid or unavailable capacity.
+    if (capacity <= 0.0) {
+        return 0.0;
+    }
+
+    double traffic = 0.0;
+
+    // Check every active traffic flow.
+    for (const auto& flow : trafficFlows) {
+
+        // Check every consecutive pair in the flow route.
+        for (size_t i = 0;
+             i + 1 < flow.route.size();
+             ++i) {
+
+            int from = flow.route[i];
+            int to = flow.route[i + 1];
+
+            // Links are undirected.
+            if ((from == source && to == destination) ||
+                (from == destination && to == source)) {
+
+                traffic += flow.demand;
+                break;
+            }
+        }
+    }
+
+    return (traffic / capacity) * 100.0;
+}
+
+
+
+
+bool Graph::isLinkOverloaded(
+    int source,
+    int destination
+) const {
+    return getLinkUtilization(source, destination) > 100.0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void Graph::displayTrafficDashboard() const {
+
+    std::cout << "\n";
+    std::cout << "========================================\n";
+    std::cout << "          TRAFFIC DASHBOARD\n";
+    std::cout << "========================================\n\n";
+
+    if (adjacencyList.empty()) {
+        std::cout << "Network is empty.\n";
+        return;
+    }
+
+    std::cout << "Link              Capacity    Utilization    Status\n";
+    std::cout << "----------------------------------------------------\n";
+
+    for (const auto& [source, neighbors] : adjacencyList) {
+
+        for (int destination : neighbors) {
+
+            // Print each undirected link only once.
+            if (source >= destination) {
+                continue;
+            }
+
+            double capacity =
+                getEdgeCapacity(source, destination);
+
+            double utilization =
+                getLinkUtilization(source, destination);
+
+            std::cout << source
+                      << " -- "
+                      << destination;
+
+            // Align the columns.
+            std::cout << "              ";
+
+            if (capacity > 0.0) {
+                std::cout << capacity;
+            } else {
+                std::cout << "N/A";
+            }
+
+            std::cout << "        "
+                      << utilization
+                      << "%";
+
+            std::cout << "        ";
+
+            if (isLinkOverloaded(source, destination)) {
+                std::cout << "OVERLOADED";
+            } else {
+                std::cout << "OK";
+            }
+
+            std::cout << "\n";
+        }
+    }
+
+    std::cout << "========================================\n";
 }
